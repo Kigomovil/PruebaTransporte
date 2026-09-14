@@ -56,6 +56,15 @@
 .tab.active{ background:#111; color:#fff; border-color:#111; box-shadow:0 4px 12px rgba(0,0,0,.15) }
 .tab-content{display:none}
 .tab-content.active{display:block}
+
+/* NUEVA PANTALLA BUSCANDO */
+#screenBuscar{position:fixed;inset:0;max-width:500px;margin:0 auto;background:#fff;z-index:6000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px}
+#screenBuscar.show{display:flex}
+.lupaSearch{width:110px;height:110px;border-radius:50%;background:#fff;border:3px solid #E53935;display:flex;align-items:center;justify-content:center;position:relative;animation:pulseRed 1.6s infinite}
+@keyframes pulseRed{0%{box-shadow:0 0 0 0 rgba(229,57,53,.5)}70%{box-shadow:0 0 0 25px rgba(229,57,53,0)}100%{box-shadow:0 0 0 0 rgba(229,57,53,0)}}
+.barLoad{width:220px;height:6px;background:#f0f0f0;border-radius:10px;overflow:hidden;margin-top:24px}
+.barFill{height:100%;width:0%;background:#E53935;border-radius:10px;animation:loadRed 2.5s ease-in-out infinite}
+@keyframes loadRed{0%{width:10%}50%{width:80%}100%{width:95%}}
 </style>
 </head>
 <body>
@@ -224,6 +233,15 @@
 </div>
 </div>
 
+<div id="screenBuscar">
+<div class="lupaSearch">
+<svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#E53935" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M21 21l-4.2-4.2"/></svg>
+</div>
+<div style="text-align:center;margin-top:18px"><div style="font-weight:900;font-size:18px;color:#111">Buscando conductor cercano...</div><div id="buscarInfo" style="font-size:11px;color:#666;margin-top:6px;font-weight:700">Asignando el mejor conductor para ti</div></div>
+<div class="barLoad"><div class="barFill"></div></div>
+<div style="font-size:10px;opacity:.5;margin-top:16px;font-weight:700">Kigo Xpress • Dolores Hidalgo</div>
+</div>
+
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyDjxi5qxVVbC7lufDPdBWRUzkiSZ2o9gnE",
@@ -305,7 +323,6 @@ function calcRouteGoogle(){
  });
 }
 
-function distMts(a,b,c,d){const R=6371000;const dLat=(c-a)*Math.PI/180;const dLon=(d-b)*Math.PI/180;const x=Math.sin(dLat/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 function getExtraLluviaPorNivel(nivel){ if(nivel==='leve') return parseInt(cfg.precioLeve)||0; if(nivel==='moderada') return parseInt(cfg.precioMod)||5; if(nivel==='fuerte') return parseInt(cfg.precioFuerte)||10; return 0; }
 function iconoClimaReal(code,isDay){ let icon='☀️'; let desc='Soleado'; if(code===0){ icon=isDay?'☀️':'🌙'; desc=isDay?'Soleado':'Noche despejada'; } else if([1].includes(code)){ icon=isDay?'🌤️':'🌙'; desc='Mayormente soleado'; } else if([2].includes(code)){ icon='⛅'; desc='Parcial nublado'; } else if([3].includes(code)){ icon='☁️'; desc='Nublado'; } else if([45,48].includes(code)){ icon='🌫️'; desc='Niebla'; } else if([51,53,55,61,63,65,80,81,82].includes(code)){ icon='🌧️'; desc='Lluvia'; } else if([95,96,99].includes(code)){ icon='⛈️'; desc='Tormenta'; } return {icon,desc}; }
 async function detectarLluviaDolores(){
@@ -363,7 +380,7 @@ function usarMiUbicacion(){
   });
   if(pickupMarker) pickupMarker.setMap(null);
   pickupMarker=new google.maps.Marker({position:latlng,map:map,icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:"#16a34a",fillOpacity:1,strokeColor:"#fff",strokeWeight:2}});
-  map.setView(latlng,17); map.setCenter(latlng); document.getElementById("btnClearOrigen").style.display='flex';
+  map.setCenter(latlng); map.setZoom(17); document.getElementById("btnClearOrigen").style.display='flex';
   if(destinationLat) calcRouteGoogle();
  });
 }
@@ -371,7 +388,6 @@ function pedirUbicacion(){ usarMiUbicacion(); }
 
 document.getElementById("calculateButton").onclick=()=>{
  if(!pickupLat||!destinationLat){alert("Llena origen y destino");return;}
- // Si no hay ruta calculada, calcúla
  if(!datosViaje.distKm) calcRouteGoogle();
  setTimeout(()=>{
   document.getElementById('panel2').classList.add('show');
@@ -435,19 +451,21 @@ function actualizarDireccionConfirm(lat,lng){
  geocoder.geocode({location:latlng},(r,s)=>{ if(s==="OK"&&r[0]) document.getElementById('txtPickupConfirm').innerText=r[0].formatted_address; });
  recalcularPrecioTiempoReal(lat,lng);
 }
-function usarMiUbicacionConfirm(){ navigator.geolocation.getCurrentPosition(pos=>{ finalPickupLat=pos.coords.latitude; finalPickupLng=pos.coords.longitude; const ll=new google.maps.LatLng(finalPickupLat,finalPickupLng); markerConfirm.setPosition(ll); mapConfirm.setView(ll); mapConfirm.setCenter(ll); actualizarDireccionConfirm(finalPickupLat,finalPickupLng); }); }
+function usarMiUbicacionConfirm(){ navigator.geolocation.getCurrentPosition(pos=>{ finalPickupLat=pos.coords.latitude; finalPickupLng=pos.coords.longitude; const ll=new google.maps.LatLng(finalPickupLat,finalPickupLng); markerConfirm.setPosition(ll); mapConfirm.setCenter(ll); actualizarDireccionConfirm(finalPickupLat,finalPickupLng); }); }
 function volverMapa(){ document.getElementById('panel3').classList.remove('show'); document.getElementById('panel2').classList.add('show'); }
+
 function confirmarViajeFinal(){
  let precio=tipo==='moto'?datosViaje.precioMoto:datosViaje.precioCarro;
  let contador=parseInt(localStorage.getItem('kigo_contador')||'0')+1; localStorage.setItem('kigo_contador',contador.toString());
- let ahora=new Date(); let hora=ahora.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',hour12:true}); let fecha=ahora.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
- let linkRuta=`https://www.google.com/maps/dir/${finalPickupLat},${finalPickupLng}/${datosViaje.destLat},${datosViaje.destLng}`;
- let linkPunto=`https://www.google.com/maps?q=${finalPickupLat},${finalPickupLng}`;
- let lluviaLinea=''; if(datosViaje.lluviaExtra>0) lluviaLinea=`🌧️ CLIMA: ${datosViaje.lluviaNivel.toUpperCase()} +$${datosViaje.lluviaExtra}\n`;
- let msg=`🏢 *${cfg.nombre.toUpperCase()}*\n⏰ ${hora} - ${fecha}\n#${contador.toString().padStart(4,'0')} - ${tipo.toUpperCase()}\n${lluviaLinea}\n📍 ${pickupName}\n📌 ${linkPunto}\n🏁 ${datosViaje.destino}\n🗺️ ${linkRuta}\n📏 ${datosViaje.distKm} km - 💰 $${precio} MXN`;
- window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+ let ahora=new Date();
  let hist=JSON.parse(localStorage.getItem('kigo_hist')||'[]'); hist.unshift({tipo:tipo,precio:precio,fecha:ahora.toLocaleString(),hora:ahora.getHours(),origen:pickupName,destino:destName,km:datosViaje.distKm}); if(hist.length>100) hist=hist.slice(0,100); localStorage.setItem('kigo_hist',JSON.stringify(hist));
+
+ // MOSTRAR PANTALLA BUSCANDO CONDUCTOR
+ document.getElementById('panel3').classList.remove('show');
+ document.getElementById('screenBuscar').classList.add('show');
+ document.getElementById('buscarInfo').innerText=`${datosViaje.distKm} km • $${precio} MXN • ${tipo.toUpperCase()} - Buscando conductor...`;
 }
+
 function switchTab(name){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); document.getElementById('tab-'+name).classList.add('active'); const m={'ajustes':0,'config':1,'registros':2,'estadisticas':3}; const tabs=document.querySelectorAll('.tab'); if(m[name]!==undefined) tabs[m[name]].classList.add('active'); }
 function abrirAdmin(){ if(localStorage.getItem('kigo_admin_sesion')==='1'){ document.getElementById('panelAdmin').style.display='flex'; cargarAdmin(); detectarLluviaDolores(); return; } document.getElementById('modalAdmin').classList.add('show'); }
 function cerrarAdmin(){ document.getElementById('modalAdmin').classList.remove('show'); }
@@ -455,6 +473,7 @@ function irInicioForzado(){
  const p=document.getElementById('panelAdmin'); if(p) p.style.display='none';
  document.getElementById('panel2').classList.remove('show');
  document.getElementById('panel3').classList.remove('show');
+ document.getElementById('screenBuscar').classList.remove('show');
  document.getElementById('modalAdmin').classList.remove('show');
  setTimeout(()=>{ if(map) google.maps.event.trigger(map,'resize'); if(mapConfirm) google.maps.event.trigger(mapConfirm,'resize'); },150);
 }
