@@ -1,47 +1,76 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Kigo Transporte</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
-:root{--yellow:#FFD60A;--black:#0A0A0A;--white:#fff;--gray:#F5F5F7;--neon:#00E676}
-body{background:#fff;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-#map{flex:1;position:relative;background:#e5e7eb}
-.bottom-sheet{background:#fff;border-radius:28px 28px 0 0;box-shadow:0 -15px 40px rgba(0,0,0,.15);padding:22px 20px 30px;z-index:3;margin-top:-24px}
-.route-info{background:var(--black);border-radius:18px;padding:14px 16px;display:none;align-items:center;justify-content:space-between;margin-bottom:16px;border:1px solid #1e1e1e}
+:root{--yellow:#FFD60A;--black:#0A0A0A;--white:#fff;--gray:#F5F5F7;--neonY:#FFEB3B}
+body{background:#fff;height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+#map{flex:1;position:relative;background:#e5e7eb;min-height:52vh}
+.bottom-sheet{
+ background:#fff;border-radius:28px 28px 0 0;
+ box-shadow:0 -15px 40px rgba(0,0,0,.15);
+ padding:16px 20px 22px;z-index:3;margin-top:-18px;
+ max-height:48dvh;overflow-y:auto; /* PARA DESLIZAR Y VER EL BOTON */
+ -webkit-overflow-scrolling:touch;
+}
+.route-info{background:var(--black);border-radius:18px;padding:12px 16px;display:none;align-items:center;justify-content:space-between;margin-bottom:14px;border:1px solid #1e1e1e}
 .route-info.show{display:flex}
-.route-km{font-size:10px;font-weight:800;letter-spacing:1px;color:#9ca3af}
-.route-dist{font-size:13px;font-weight:800;color:#fff;margin-top:2px}
-.route-price{font-size:22px;font-weight:900;color:var(--neon);text-shadow:0 0 18px rgba(0,230,118,.7)}
-.field{position:relative;margin-bottom:14px}
-.field label{font-size:9px;font-weight:800;letter-spacing:1px;opacity:.45;margin-bottom:6px;display:block}
-.input-box{display:flex;align-items:center;gap:10px;background:var(--gray);border:2px solid transparent;border-radius:16px;height:56px;padding:0 14px;transition:.2s}
+.route-km{font-size:9px;font-weight:800;letter-spacing:1px;color:#9ca3af}
+.route-dist{font-size:12px;font-weight:800;color:#fff;margin-top:2px}
+.route-price{font-size:20px;font-weight:900;color:var(--neonY);text-shadow:0 0 18px rgba(255,235,59,.8)}
+.field{position:relative;margin-bottom:12px}
+.field label{font-size:9px;font-weight:800;letter-spacing:1px;opacity:.45;margin-bottom:5px;display:block}
+.input-box{display:flex;align-items:center;gap:10px;background:var(--gray);border:2px solid transparent;border-radius:16px;height:54px;padding:0 14px;transition:.2s}
 .input-box.focus{border-color:var(--yellow);background:#fff}
 .input-box input{flex:1;border:none;background:transparent;outline:none;font-weight:600;font-size:14px}
-.btn-clear{width:30px;height:30px;border-radius:50%;background:#fff;border:1px solid #e5e7eb;display:none;align-items:center;justify-content:center;cursor:pointer;font-weight:800}
+.btn-clear{width:28px;height:28px;border-radius:50%;background:#fff;border:1px solid #e5e7eb;display:none;align-items:center;justify-content:center;cursor:pointer;font-weight:800}
 .btn-clear.show{display:flex}
-.btn-iniciar{width:100%;height:58px;border-radius:18px;background:var(--black);color:#fff;border:none;font-weight:900;font-size:15px;letter-spacing:.6px;cursor:pointer;box-shadow:0 12px 24px rgba(0,0,0,.22);margin-top:8px;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-iniciar{width:100%;height:56px;border-radius:18px;background:var(--black);color:#fff;border:none;font-weight:900;font-size:15px;letter-spacing:.6px;cursor:pointer;box-shadow:0 12px 24px rgba(0,0,0,.22);margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;flex-shrink:0}
 .btn-iniciar:disabled{background:#e5e7eb;color:#9ca3af;box-shadow:none}
-.icon-btn{width:28px;height:28px;background:var(--yellow);color:var(--black);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900}
-.dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.icon-btn{width:28px;height:28px;background:var(--yellow);color:var(--black);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900}
+.dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
 .dot.pick{background:#00C853;box-shadow:0 0 0 4px rgba(0,200,83,.18)}
 .dot.dest{background:#FF1744;box-shadow:0 0 0 4px rgba(255,23,68,.18)}
-.loc-toast{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:var(--black);color:#fff;padding:10px 16px;border-radius:30px;font-size:12px;font-weight:600;z-index:5;display:none}
+
+/* CLIMA ARRIBA DERECHA */
+.weather-card{
+ position:absolute;top:12px;right:12px;z-index:4;
+ background:rgba(10,10,10,.85);backdrop-filter:blur(12px);
+ color:#fff;border-radius:16px;padding:8px 12px;
+ display:flex;align-items:center;gap:8px;
+ border:1px solid rgba(255,255,255,.1);
+}
+.weather-card.temp{font-weight:900;font-size:14px}
+.weather-card.cond{font-size:9px;opacity:.7;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.weather-icon{width:28px;height:28px;display:flex;align-items:center;justify-content:center}
+.weather-icon svg{width:22px;height:22px;fill:var(--yellow)}
+.loc-toast{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:var(--black);color:#fff;padding:8px 14px;border-radius:30px;font-size:11px;font-weight:600;z-index:5;display:none}
 </style>
 </head>
 <body>
-<div id="map"><div class="loc-toast" id="locToast">📍 Ubicándote en Dolores Hidalgo...</div></div>
+<div id="map">
+  <div class="weather-card" id="weatherCard" style="display:none">
+    <div class="weather-icon" id="weatherIcon"></div>
+    <div><div class="temp" id="weatherTemp">--°</div><div class="cond" id="weatherCond">Cargando</div></div>
+  </div>
+  <div class="loc-toast" id="locToast">📍 Ubicándote...</div>
+</div>
+
 <div class="bottom-sheet">
-<div id="routeInfo" class="route-info"><div><div class="route-km">DISTANCIA ESTIMADA • PRECIO</div><div class="route-dist" id="kmText">0 km</div></div><div class="route-price" id="priceText">$0</div></div>
+<div id="routeInfo" class="route-info"><div><div class="route-km">DISTANCIA ESTIMADA • PRECIO</div><div class="route-dist" id="kmText">0 km</div></div><div class="route-price" id="priceText">$0 MXN</div></div>
 <div class="field"><label>¿DÓNDE TE RECOGEMOS?</label><div class="input-box" id="boxPick"><div class="dot pick"></div><input id="pickup" placeholder="Escribe aquí de dónde te recogemos"><button class="btn-clear" id="clearPick">×</button></div></div>
 <div class="field"><label>¿A DÓNDE VAS?</label><div class="input-box" id="boxDest"><div class="dot dest"></div><input id="destino" placeholder="Escribe aquí a dónde quieres ir"><button class="btn-clear" id="clearDest">×</button></div></div>
 <button class="btn-iniciar" id="btnIniciar" disabled><span class="icon-btn">➤</span> INICIAR</button>
+<div style="height:10px"></div>
 </div>
+
 <script>
 const DOLORES={lat:21.1585,lng:-100.9340};
 let map,directionsService,directionsRenderer,autocompletePick,autocompleteDest,markerPick,markerDest;
+
 function initMap(){
   map=new google.maps.Map(document.getElementById("map"),{center:DOLORES,zoom:14,disableDefaultUI:true});
   directionsService=new google.maps.DirectionsService();
@@ -50,16 +79,11 @@ function initMap(){
   map.overlayMapTypes.push(rainMap);
   autocompletePick=new google.maps.places.Autocomplete(document.getElementById("pickup"),{componentRestrictions:{country:["mx"]}});
   autocompleteDest=new google.maps.places.Autocomplete(document.getElementById("destino"),{componentRestrictions:{country:["mx"]}});
-  autocompletePick.addListener("place_changed",()=>{
-    let p=autocompletePick.getPlace(); if(!p.geometry)return;
-    setPickup(p.geometry.location); if(document.getElementById("destino").value)calcRoute();
-  });
-  autocompleteDest.addListener("place_changed",()=>{
-    let p=autocompleteDest.getPlace(); if(!p.geometry)return;
-    setDest(p.geometry.location); calcRoute();
-  });
-  pedirUbicacion();
+  autocompletePick.addListener("place_changed",()=>{let p=autocompletePick.getPlace();if(!p.geometry)return;setPickup(p.geometry.location);document.getElementById("clearPick").classList.add("show");if(document.getElementById("destino").value)calcRoute();});
+  autocompleteDest.addListener("place_changed",()=>{let p=autocompleteDest.getPlace();if(!p.geometry)return;setDest(p.geometry.location);document.getElementById("clearDest").classList.add("show");calcRoute();});
+  pedirUbicacion(); cargarClima();
 }
+
 function pedirUbicacion(){
   const t=document.getElementById("locToast"); t.style.display="block";
   if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>{
@@ -67,38 +91,59 @@ function pedirUbicacion(){
   },()=>{map.setCenter(DOLORES); t.style.display="none";});}
 }
 function reverse(ll){ new google.maps.Geocoder().geocode({location:ll},(r,s)=>{if(s==="OK"&&r[0]){document.getElementById("pickup").value=r[0].formatted_address; document.getElementById("clearPick").classList.add("show");}});}
+
 function setPickup(pos){
   if(markerPick)markerPick.setMap(null);
-  markerPick=new google.maps.Marker({position:pos,map:map,icon:{url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#00C853" fill-opacity="0.2"/><circle cx="20" cy="20" r="10" fill="#00C853" stroke="white" stroke-width="3"/><path d="M20 8 L24 14 L20 12 L16 14 Z" fill="#00C853"/></svg>'),scaledSize:new google.maps.Size(40,40),anchor:new google.maps.Point(20,20)}});
+  markerPick=new google.maps.Marker({position:pos,map:map,icon:{url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40"><path d="M16 0C7.16 0 0 7.16 0 16c0 11.5 16 24 16 24s16-12.5 16-24C32 7.16 24.84 0 16 0z" fill="%2300C853"/><circle cx="16" cy="16" r="6" fill="white"/></svg>'),scaledSize:new google.maps.Size(32,40),anchor:new google.maps.Point(16,40)}});
 }
 function setDest(pos){
   if(markerDest)markerDest.setMap(null);
-  markerDest=new google.maps.Marker({position:pos,map:map,icon:{url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="50" viewBox="0 0 40 50"><path d="M20 0 C9 0 0 9 0 18 C0 30 20 50 20 50 C20 50 40 30 40 18 C40 9 31 0 20 0 Z" fill="#FF1744"/><circle cx="20" cy="18" r="8" fill="white"/></svg>'),scaledSize:new google.maps.Size(40,50),anchor:new google.maps.Point(20,50)}});
+  markerDest=new google.maps.Marker({position:pos,map:map,icon:{url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40"><path d="M16 0C7.16 0 0 7.16 0 16c0 11.5 16 24 16 24s16-12.5 16-24C32 7.16 24.84 0 16 0z" fill="%23FF1744"/><circle cx="16" cy="16" r="6" fill="white"/></svg>'),scaledSize:new google.maps.Size(32,40),anchor:new google.maps.Point(16,40)}});
 }
+
 function calcRoute(){
   let pick=document.getElementById("pickup").value; let dest=document.getElementById("destino").value; if(!pick||!dest)return;
   directionsService.route({origin:pick,destination:dest,travelMode:google.maps.TravelMode.DRIVING},(res,status)=>{
     if(status==="OK"){
       directionsRenderer.setDirections(res);
       let leg=res.routes[0].legs[0]; let km=leg.distance.value/1000;
-      let total=25 + km*9;
+      let total=25+km*9;
       document.getElementById("kmText").innerText=leg.distance.text+" • "+leg.duration.text;
-      document.getElementById("priceText").innerText="$"+Math.round(total);
+      document.getElementById("priceText").innerText="$"+Math.round(total)+" MXN";
       document.getElementById("routeInfo").classList.add("show");
       document.getElementById("btnIniciar").disabled=false;
     }
   });
 }
-document.getElementById("clearPick").onclick=()=>{document.getElementById("pickup").value=""; document.getElementById("clearPick").classList.remove("show"); if(markerPick)markerPick.setMap(null); document.getElementById("routeInfo").classList.remove("show"); document.getElementById("btnIniciar").disabled=true;};
-document.getElementById("clearDest").onclick=()=>{document.getElementById("destino").value=""; document.getElementById("clearDest").classList.remove("show"); if(markerDest)markerDest.setMap(null); document.getElementById("routeInfo").classList.remove("show"); document.getElementById("btnIniciar").disabled=true;};
-document.getElementById("pickup").addEventListener("input",()=>{document.getElementById("clearPick").classList.toggle("show", document.getElementById("pickup").value.length>0)});
-document.getElementById("destino").addEventListener("input",()=>{document.getElementById("clearDest").classList.toggle("show", document.getElementById("destino").value.length>0)});
-document.getElementById("boxPick").onclick=()=>document.getElementById("boxPick").classList.add("focus");
-document.getElementById("boxDest").onclick=()=>document.getElementById("boxDest").classList.add("focus");
-document.getElementById("btnIniciar").onclick=()=>{
-  let p=document.getElementById("pickup").value; let d=document.getElementById("destino").value; let pr=document.getElementById("priceText").innerText;
-  alert("Viaje Kigo:\nDe: "+p+"\nA: "+d+"\nPrecio: "+pr);
-};
+
+// BORRAR
+document.getElementById("clearPick").onclick=()=>{document.getElementById("pickup").value="";document.getElementById("clearPick").classList.remove("show");if(markerPick)markerPick.setMap(null);document.getElementById("routeInfo").classList.remove("show");document.getElementById("btnIniciar").disabled=true;};
+document.getElementById("clearDest").onclick=()=>{document.getElementById("destino").value="";document.getElementById("clearDest").classList.remove("show");if(markerDest)markerDest.setMap(null);document.getElementById("routeInfo").classList.remove("show");document.getElementById("btnIniciar").disabled=true;};
+document.getElementById("pickup").addEventListener("focus",()=>document.getElementById("boxPick").classList.add("focus"));
+document.getElementById("pickup").addEventListener("blur",()=>document.getElementById("boxPick").classList.remove("focus"));
+document.getElementById("destino").addEventListener("focus",()=>document.getElementById("boxDest").classList.add("focus"));
+document.getElementById("destino").addEventListener("blur",()=>document.getElementById("boxDest").classList.remove("focus"));
+
+// CLIMA REAL DOLORES HIDALGO
+async function cargarClima(){
+  try{
+    let res=await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=21.1585&lon=-100.9340&units=metric&lang=es&appid=439d4b804bc8187953eb36d2a8c26a02`);
+    let data=await res.json();
+    let temp=Math.round(data.main.temp);
+    let cond=data.weather[0].main; // Clear, Clouds, Rain...
+    let desc=data.weather[0].description;
+    document.getElementById("weatherTemp").innerText=temp+"°C";
+    document.getElementById("weatherCond").innerText=desc;
+    document.getElementById("weatherIcon").innerHTML=getWeatherSVG(cond);
+    document.getElementById("weatherCard").style.display="flex";
+  }catch(e){console.log("clima error",e)}
+}
+function getWeatherSVG(main){
+  if(main==="Clear") return `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
+  if(main==="Clouds") return `<svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.9-1A4.5 4.5 0 0 1 21 13.5a4.5 4.5 0 0 1-4.5 4.5H7z"/></svg>`;
+  if(main==="Rain"||main==="Drizzle") return `<svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.9-1A4.5 4.5 0 0 1 21 13.5a3.5 3.5 0 0 1-3.5 3.5H7z"/><path d="M8 19l1 3M12 19l1 3M16 19l1 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+  return `<svg viewBox="0 0 24 24"><path d="M3 15a4 4 0 0 0 4 4h9a5 5 0 1 0-.1-10 7 7 0 0 0-12.9 4z"/></svg>`;
+}
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap" async defer></script>
 </body>
