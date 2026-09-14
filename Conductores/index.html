@@ -9,19 +9,21 @@
 <style>
 *{box-sizing:border-box;font-family:system-ui}body{margin:0;background:#0a0a0a;color:#fff;overflow:hidden}
 .app{max-width:480px;margin:0 auto;background:#0f0f0f;height:100dvh;display:flex;flex-direction:column;position:relative}
-#map{width:100%;height:100%}
+#map{width:100%;height:100%;min-height:200px}
 .header{background:#fff;color:#111;padding:12px 14px;display:flex;align-items:center;gap:10px;border-radius:0 0 20px 20px;z-index:10}
 .avatar{width:46px;height:46px;border-radius:50%;border:2px solid #E53935;object-fit:cover}
 .btn-neon{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .btn-neon.on{background:#16a34a;box-shadow:0 0 12px #16a34a,0 0 20px #16a34a;color:#fff}
 .btn-neon.off{background:#1a1a1a;box-shadow:0 0 8px #ff0000aa;color:#ff4444;border:1px solid #ff4444}
 .card-dark{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:18px;padding:14px;margin-bottom:10px}
-.pedido-item{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:14px;padding:12px;margin-bottom:10px;position:relative;overflow:hidden;transition:opacity.8s}
-.pedido-item.fade{opacity:0;transform:translateX(100%);transition:all.8s}
-.progress{position:absolute;bottom:0;left:0;height:3px;background:#E53935;width:100%;transition:width 10s linear}
+.pedido-item{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:16px;padding:12px;margin-bottom:12px;position:relative;overflow:hidden;transition:all.6s}
+.pedido-item.fade{opacity:0;transform:translateX(100%)}
 .badge-neon{display:inline-block;padding:4px 10px;border-radius:999px;font-size:10px;font-weight:900}
 .badge-price{background:rgba(22,163,74,.15);color:#16a34a;border:1px solid rgba(22,163,74,.4);box-shadow:0 0 10px rgba(22,163,74,.3)}
 .badge-pay{background:rgba(229,57,53,.15);color:#ff6b6b;border:1px solid rgba(229,57,53,.4)}
+.btn-aceptar{position:relative;width:100%;height:44px;background:#222;border-radius:12px;border:1px solid #333;overflow:hidden;margin-top:10px;cursor:pointer}
+.btn-aceptar-fill{position:absolute;left:0;top:0;bottom:0;width:100%;background:#E53935;transition:width 10s linear;box-shadow:inset 0 0 10px rgba(0,0,0,.3)}
+.btn-aceptar-text{position:relative;z-index:2;width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:900;font-size:13px;color:#fff}
 .modal{position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.85);display:none;align-items:flex-end;justify-content:center}
 .modal.show{display:flex}
 .modal-content{width:100%;max-width:480px;background:#151515;border-radius:22px 22px 0 0;padding:20px 16px 30px;border:1px solid #2a2a2a}
@@ -45,10 +47,10 @@
 
 <div style="flex:1;position:relative"><div id="map"></div></div>
 
-<div style="background:#111;padding:12px 12px 20px;border-radius:22px 22px 0 0;margin-top:-18px;z-index:5;overflow:auto;max-height:50vh">
+<div style="background:#111;padding:12px 12px 20px;border-radius:22px 22px 0 0;margin-top:-18px;z-index:5;overflow:auto;max-height:52vh">
 <div style="font-size:9px;font-weight:800;letter-spacing:1px;opacity:.5;margin-bottom:8px">PEDIDO ACTIVO</div>
 <div id="pedidoActivoBox"><div style="text-align:center;padding:14px;background:#1c1c1c;border-radius:14px;border:1px dashed #333;font-size:12px;opacity:.6">Sin pedidos activos</div></div>
-<div style="font-size:9px;font-weight:800;letter-spacing:1px;opacity:.5;margin:14px 0 8px">PEDIDOS EN ESPERA (10s para aceptar)</div>
+<div style="font-size:9px;font-weight:800;letter-spacing:1px;opacity:.5;margin:14px 0 8px">PEDIDOS EN ESPERA</div>
 <div id="pedidosEsperaBox"><div style="text-align:center;padding:10px;font-size:11px;opacity:.4">Esperando pedidos...</div></div>
 </div>
 </div>
@@ -91,14 +93,14 @@ function guardarAjustes(){
   localStorage.setItem('kigo_driver_data', JSON.stringify(driverData));
   document.getElementById("dName").innerText=driverData.nombre;
   document.getElementById("dMoto").innerText=driverData.moto+" • "+driverData.tipo.toUpperCase();
-  if(driverUid) db.ref('conductores/'+driverUid).update({...driverData, disponible:disponible, online:true});
+  db.ref('conductores/'+driverUid).update({...driverData, disponible:disponible, online:true});
   closeAjustes();
 }
 
-function init(){
+function initMap(){
   document.getElementById("dName").innerText=driverData.nombre;
   document.getElementById("dMoto").innerText=driverData.moto+" • "+driverData.tipo.toUpperCase();
-  map=new google.maps.Map(document.getElementById("map"),{center:{lat:driverData.lat,lng:driverData.lng},zoom:15,disableDefaultUI:true});
+  map=new google.maps.Map(document.getElementById("map"),{center:{lat:driverData.lat,lng:driverData.lng},zoom:15,disableDefaultUI:false, zoomControl:true});
   directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:false,polylineOptions:{strokeColor:"#E53935",strokeWeight:6}});
   directionsService=new google.maps.DirectionsService();
   iniciarUbicacion();
@@ -113,7 +115,6 @@ function iniciarUbicacion(){
     driverData.lat=pos.coords.latitude; driverData.lng=pos.coords.longitude;
     localStorage.setItem('kigo_driver_data', JSON.stringify(driverData));
     if(disponible) db.ref('conductores/'+driverUid).update({lat:driverData.lat,lng:driverData.lng,...driverData, disponible:true, online:true});
-    if(!viajeActual) map.setCenter({lat:driverData.lat,lng:driverData.lng});
   },null,{enableHighAccuracy:true});
 }
 function toggleDisponible(){
@@ -130,7 +131,7 @@ function escucharViajes(){
   if(viajesListener) viajesListener.off();
   viajesListener=db.ref('viajes').orderByChild('estado').equalTo('buscando');
   viajesListener.on('value', snap=>{
-    if(viajeActual) return; // solo 1 pedido a la vez
+    if(viajeActual) return;
     const viajes=snap.val();
     const box=document.getElementById("pedidosEsperaBox");
     if(!viajes){ box.innerHTML='<div style="text-align:center;padding:10px;font-size:11px;opacity:.4">Esperando pedidos...</div>'; return; }
@@ -141,36 +142,39 @@ function escucharViajes(){
     lista.forEach(v=>{
       html+=`
       <div id="pedido_${v.id}" class="pedido-item">
-        <div style="position:absolute;bottom:0;left:0;height:3px;background:#E53935;width:100%" id="prog_${v.id}"></div>
-        <div style="flex:1">
-          <div style="font-weight:800;font-size:12px">📍 ${v.destino.substring(0,34)}</div>
-          <div style="font-size:10px;opacity:.6">Desde: ${v.origen.substring(0,30)} • ${v.distKm} km</div>
-          <div style="margin-top:4px"><span class="badge-neon badge-price">$${v.precio} MXN</span> <span class="badge-neon badge-pay">${(v.metodoPago||'efectivo').toUpperCase()}</span></div>
+        <div style="font-weight:800;font-size:12px">📍 ${v.destino.substring(0,34)}</div>
+        <div style="font-size:10px;opacity:.6;margin-top:2px">Desde: ${v.origen.substring(0,30)} • ${v.distKm} km</div>
+        <div style="margin-top:6px"><span class="badge-neon badge-price">$${v.precio} MXN</span> <span class="badge-neon badge-pay">${(v.metodoPago||'efectivo').toUpperCase()}</span></div>
+        <div class="btn-aceptar" onclick="aceptarPedido('${v.id}')">
+          <div id="fill_${v.id}" class="btn-aceptar-fill"></div>
+          <div class="btn-aceptar-text"><span>ACEPTAR VIAJE</span> <span id="sec_${v.id}" style="background:#fff;color:#E53935;padding:2px 8px;border-radius:999px;font-size:11px">10s</span></div>
         </div>
-        <button onclick="aceptarPedido('${v.id}')" style="margin-left:10px;height:38px;padding:0 16px;background:#E53935;color:#fff;border:none;border-radius:10px;font-weight:900;font-size:12px;box-shadow:0 0 10px rgba(229,57,53,.5)">ACEPTAR</button>
       </div>`;
     });
     box.innerHTML=html;
-    // iniciar temporizadores 10s con desvanecimiento
     lista.forEach(v=>{
-      if(timers[v.id]) clearTimeout(timers[v.id]);
-      const prog=document.getElementById("prog_"+v.id);
-      if(prog){ setTimeout(()=>prog.style.width="0%",50); }
-      timers[v.id]=setTimeout(()=>{
+      if(timers[v.id]){ clearInterval(timers[v.id].interval); clearTimeout(timers[v.id].timeout); }
+      let segundos=10;
+      const fill=document.getElementById("fill_"+v.id);
+      const sec=document.getElementById("sec_"+v.id);
+      if(fill) setTimeout(()=>{ fill.style.width="0%"; },100);
+      let interval=setInterval(()=>{
+        segundos--; if(sec) sec.innerText=segundos+"s";
+        if(segundos<=3){ if(fill) fill.style.background="#8B0000"; }
+      },1000);
+      let timeout=setTimeout(()=>{
         const el=document.getElementById("pedido_"+v.id);
-        if(el){ el.classList.add("fade"); setTimeout(()=>{
-          el.remove();
-          // rotar: vuelve a poner el pedido al final (en Firebase no lo borramos, solo lo re-enviamos)
-          db.ref('viajes/'+v.id).update({ultimoRechazo:Date.now()}); // para que otros conductores lo tomen
-        },800); }
+        if(el){ el.classList.add("fade"); setTimeout(()=>{ el.remove(); db.ref('viajes/'+v.id).update({ultimoRechazo:Date.now()}); },700); }
+        clearInterval(interval);
       },10000);
+      timers[v.id]={interval, timeout};
     });
   });
 }
 
 function aceptarPedido(id){
-  if(viajeActual){ alert("Ya tienes un pedido activo"); return; }
-  if(timers[id]) clearTimeout(timers[id]);
+  if(viajeActual) return;
+  if(timers[id]){ clearInterval(timers[id].interval); clearTimeout(timers[id].timeout); }
   db.ref('viajes/'+id).once('value').then(s=>{
     const v=s.val(); if(!v || v.estado!=='buscando'){ alert("Pedido ya tomado"); return; }
     viajeActual={id,...v}; viajeActualId=id;
@@ -201,52 +205,17 @@ function mostrarActivo(v){
       <button onclick="toggleChat()" style="width:44px;height:44px;background:#1a1a1a;border:1px solid #333;border-radius:12px;color:#fff">💬</button>
     </div>
     <div id="chatActivoBox" style="display:none"><div class="chat-box" id="chatBox"></div><div style="display:flex;gap:6px"><input id="chatInput" placeholder="Mensaje cliente..." style="flex:1;height:40px;border-radius:10px;background:#0a0a0a;border:1px solid #333;color:#fff;padding:0 10px;font-size:12px"><button onclick="sendMsg()" style="width:40px;height:40px;border-radius:10px;background:#E53935;border:none;color:#fff">➤</button></div></div>
+    <button onclick="finalizarViaje()" style="width:100%;height:38px;background:#111;border:1px solid #333;color:#fff;border-radius:10px;font-weight:800;margin-top:10px;font-size:11px">FINALIZAR VIAJE</button>
   </div>`;
 }
-
-function rutaRecoger(v){
-  const origin=new google.maps.LatLng(driverData.lat, driverData.lng);
-  const dest=new google.maps.LatLng(v.origenLat, v.origenLng);
-  directionsService.route({origin:origin,destination:dest,travelMode:google.maps.TravelMode.DRIVING},(res,status)=>{ if(status==="OK") directionsRenderer.setDirections(res); });
-}
+function rutaRecoger(v){ const origin=new google.maps.LatLng(driverData.lat, driverData.lng); const dest=new google.maps.LatLng(v.origenLat, v.origenLng); directionsService.route({origin:origin,destination:dest,travelMode:google.maps.TravelMode.DRIVING},(res,status)=>{ if(status==="OK") directionsRenderer.setDirections(res); }); }
 function rutaRecogerActual(){ rutaRecoger(viajeActual); document.getElementById("btnRuta").innerText="VOY EN CAMINO A ENTREGAR"; document.getElementById("btnRuta").onclick=rutaEntregarActual; db.ref('viajes/'+viajeActualId).update({estado:'recogiendo'}); }
-function rutaEntregarActual(){
-  const origin=new google.maps.LatLng(driverData.lat, driverData.lng);
-  const dest=new google.maps.LatLng(viajeActual.destLat, viajeActual.destLng);
-  directionsService.route({origin:origin,destination:dest,travelMode:google.maps.TravelMode.DRIVING},(res,status)=>{ if(status==="OK") directionsRenderer.setDirections(res); });
-  document.getElementById("btnRuta").innerText="FINALIZAR VIAJE"; document.getElementById("btnRuta").style.background="#111"; document.getElementById("btnRuta").style.border="1px solid #333"; document.getElementById("btnRuta").onclick=finalizarViaje;
-  db.ref('viajes/'+viajeActualId).update({estado:'en_curso'});
-}
-function finalizarViaje(){
-  db.ref('viajes/'+viajeActualId).update({estado:'finalizado'});
-  db.ref('conductores/'+driverUid).update({ocupado:false, disponible:true});
-  viajeActual=null; viajeActualId=null;
-  localStorage.removeItem('kigo_pedido_activo'); localStorage.removeItem('kigo_pedido_id');
-  document.getElementById("pedidoActivoBox").innerHTML='<div style="text-align:center;padding:14px;background:#1c1c1c;border-radius:14px;border:1px dashed #333;font-size:12px;opacity:.6">Sin pedidos activos</div>';
-  disponible=true; localStorage.setItem('kigo_disponible','true'); actualizarBoton();
-  directionsRenderer.setDirections({routes:[]});
-  if(chatListener){ chatListener.off(); }
-}
+function rutaEntregarActual(){ const origin=new google.maps.LatLng(driverData.lat, driverData.lng); const dest=new google.maps.LatLng(viajeActual.destLat, viajeActual.destLng); directionsService.route({origin:origin,destination:dest,travelMode:google.maps.TravelMode.DRIVING},(res,status)=>{ if(status==="OK") directionsRenderer.setDirections(res); }); document.getElementById("btnRuta").innerText="FINALIZAR VIAJE"; document.getElementById("btnRuta").style.background="#111"; document.getElementById("btnRuta").style.border="1px solid #333"; document.getElementById("btnRuta").onclick=finalizarViaje; db.ref('viajes/'+viajeActualId).update({estado:'en_curso'}); }
+function finalizarViaje(){ db.ref('viajes/'+viajeActualId).update({estado:'finalizado'}); db.ref('conductores/'+driverUid).update({ocupado:false, disponible:true}); viajeActual=null; viajeActualId=null; localStorage.removeItem('kigo_pedido_activo'); localStorage.removeItem('kigo_pedido_id'); document.getElementById("pedidoActivoBox").innerHTML='<div style="text-align:center;padding:14px;background:#1c1c1c;border-radius:14px;border:1px dashed #333;font-size:12px;opacity:.6">Sin pedidos activos</div>'; disponible=true; localStorage.setItem('kigo_disponible','true'); actualizarBoton(); directionsRenderer.setDirections({routes:[]}); if(chatListener){ chatListener.off(); } }
 function toggleChat(){ const b=document.getElementById("chatActivoBox"); b.style.display=b.style.display==="none"?"block":"none"; }
-function escucharChat(){
-  if(chatListener) chatListener.off();
-  chatListener=db.ref('viajes/'+viajeActualId+'/chat');
-  chatListener.on('child_added', snap=>{
-    const m=snap.val(); if(!m) return;
-    const box=document.getElementById("chatBox"); if(!box) return;
-    const div=document.createElement("div"); div.className=m.de==='cliente'?'msg other':'msg me'; div.innerText=m.msg; box.appendChild(div); box.scrollTop=box.scrollHeight;
-    document.getElementById("chatActivoBox").style.display="block";
-  });
-}
-function sendMsg(){
-  const inp=document.getElementById("chatInput"); if(!inp.value.trim()) return;
-  const msg=inp.value.trim(); const box=document.getElementById("chatBox");
-  const div=document.createElement("div"); div.className="msg me"; div.innerText=msg; box.appendChild(div); box.scrollTop=box.scrollHeight;
-  db.ref('viajes/'+viajeActualId+'/chat').push({de:'conductor',msg:msg,t:Date.now()});
-  inp.value="";
-}
-window.onload=init;
+function escucharChat(){ if(chatListener) chatListener.off(); chatListener=db.ref('viajes/'+viajeActualId+'/chat'); chatListener.on('child_added', snap=>{ const m=snap.val(); if(!m) return; const box=document.getElementById("chatBox"); if(!box) return; const div=document.createElement("div"); div.className=m.de==='cliente'?'msg other':'msg me'; div.innerText=m.msg; box.appendChild(div); box.scrollTop=box.scrollHeight; document.getElementById("chatActivoBox").style.display="block"; }); }
+function sendMsg(){ const inp=document.getElementById("chatInput"); if(!inp.value.trim()) return; const msg=inp.value.trim(); const box=document.getElementById("chatBox"); const div=document.createElement("div"); div.className="msg me"; div.innerText=msg; box.appendChild(div); box.scrollTop=box.scrollHeight; db.ref('viajes/'+viajeActualId+'/chat').push({de:'conductor',msg:msg,t:Date.now()}); inp.value=""; }
 </script>
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=init"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap"></script>
 </body>
 </html>
