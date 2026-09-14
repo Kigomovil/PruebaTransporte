@@ -6,257 +6,100 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
-:root{--yellow:#FFD60A;--black:#0A0A0A;--white:#FFFFFF;--gray:#F5F5F7;--neon:#00FF88}
-body{background:var(--white);color:var(--black);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+:root{--yellow:#FFD60A;--black:#0A0A0A;--white:#fff;--gray:#F5F5F7;--neon:#00E676}
+body{background:#fff;height:100vh;overflow:hidden;display:flex;flex-direction:column}
 #map{flex:1;position:relative;background:#e5e7eb}
-#map-overlay{position:absolute;top:0;left:0;right:0;z-index:2;padding:14px;pointer-events:none}
-.route-info{
- background:var(--black);color:var(--white);border-radius:16px;padding:12px 16px;
- display:none;align-items:center;justify-content:space-between;
- pointer-events:auto;box-shadow:0 10px 30px rgba(0,0,0,0.2);
- border:1px solid #1a1a1a;
-}
+.bottom-sheet{background:#fff;border-radius:28px 28px 0 0;box-shadow:0 -15px 40px rgba(0,0,0,.15);padding:22px 20px 30px;z-index:3;margin-top:-24px}
+.route-info{background:var(--black);border-radius:18px;padding:14px 16px;display:none;align-items:center;justify-content:space-between;margin-bottom:16px;border:1px solid #1e1e1e}
 .route-info.show{display:flex}
-.route-km{font-size:12px;opacity:.7;letter-spacing:.5px}
-.route-price{font-size:20px;font-weight:900;color:var(--neon);text-shadow:0 0 15px rgba(0,255,136,.6)}
-.route-dist{font-weight:800;font-size:14px}
-.bottom-sheet{
- background:var(--white);border-radius:28px 28px 0 0;
- box-shadow:0 -10px 40px rgba(0,0,0,.12);
- padding:20px 20px 28px;z-index:3;margin-top:-20px;
-}
-.brand{display:flex;align-items:center;gap:10px;margin-bottom:18px}
-.brand-dot{width:32px;height:32px;background:var(--yellow);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900}
-.brand h1{font-size:18px;font-weight:900;letter-spacing:-.5px}.brand h1 span{font-weight:400}
-.field{position:relative;margin-bottom:12px}
-.field label{font-size:9px;font-weight:800;letter-spacing:1px;opacity:.5;margin-bottom:6px;display:block}
-.input-box{
- display:flex;align-items:center;gap:10px;
- background:var(--gray);border:2px solid transparent;
- border-radius:16px;height:52px;padding:0 14px;transition:.2s;
-}
+.route-km{font-size:10px;font-weight:800;letter-spacing:1px;color:#9ca3af}
+.route-dist{font-size:13px;font-weight:800;color:#fff;margin-top:2px}
+.route-price{font-size:22px;font-weight:900;color:var(--neon);text-shadow:0 0 18px rgba(0,230,118,.7)}
+.field{position:relative;margin-bottom:14px}
+.field label{font-size:9px;font-weight:800;letter-spacing:1px;opacity:.45;margin-bottom:6px;display:block}
+.input-box{display:flex;align-items:center;gap:10px;background:var(--gray);border:2px solid transparent;border-radius:16px;height:56px;padding:0 14px;transition:.2s}
 .input-box.focus{border-color:var(--yellow);background:#fff}
 .input-box input{flex:1;border:none;background:transparent;outline:none;font-weight:600;font-size:14px}
-.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.dot.pick{background:var(--black)}.dot.dest{background:var(--yellow);border:2px solid var(--black)}
-.btn-clear{width:28px;height:28px;border-radius:50%;background:#fff;border:1px solid #e5e7eb;display:none;align-items:center;justify-content:center;cursor:pointer;font-weight:800}
+.btn-clear{width:30px;height:30px;border-radius:50%;background:#fff;border:1px solid #e5e7eb;display:none;align-items:center;justify-content:center;cursor:pointer;font-weight:800}
 .btn-clear.show{display:flex}
-.vehiculos{display:flex;gap:10px;margin:16px 0 4px;overflow:auto;padding-bottom:4px}
-.v-card{min-width:86px;background:var(--gray);border:2px solid transparent;border-radius:16px;padding:12px 10px;text-align:center;cursor:pointer;transition:.2s}
-.v-card.active{background:var(--black);color:var(--white);border-color:var(--yellow)}
-.v-card.ico{font-size:22px;margin-bottom:4px}.v-card.name{font-size:10px;font-weight:800}
-.btn-iniciar{
- width:100%;height:56px;border-radius:18px;background:var(--yellow);color:var(--black);
- border:none;font-weight:900;font-size:15px;letter-spacing:.5px;cursor:pointer;
- box-shadow:0 10px 20px rgba(255,214,10,.35);margin-top:14px;transition:.2s;
-}
-.btn-iniciar:active{transform:scale(.98)}.btn-iniciar:disabled{background:#e5e7eb;box-shadow:none;opacity:.6}
-.loc-toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:var(--black);color:#fff;padding:10px 16px;border-radius:30px;font-size:12px;font-weight:600;z-index:5;display:none}
+.btn-iniciar{width:100%;height:58px;border-radius:18px;background:var(--black);color:#fff;border:none;font-weight:900;font-size:15px;letter-spacing:.6px;cursor:pointer;box-shadow:0 12px 24px rgba(0,0,0,.22);margin-top:8px;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-iniciar:disabled{background:#e5e7eb;color:#9ca3af;box-shadow:none}
+.icon-btn{width:28px;height:28px;background:var(--yellow);color:var(--black);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900}
+.dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.dot.pick{background:#00C853;box-shadow:0 0 0 4px rgba(0,200,83,.18)}
+.dot.dest{background:#FF1744;box-shadow:0 0 0 4px rgba(255,23,68,.18)}
+.loc-toast{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:var(--black);color:#fff;padding:10px 16px;border-radius:30px;font-size:12px;font-weight:600;z-index:5;display:none}
 </style>
 </head>
 <body>
-
-<div id="map"></div>
-
-<div id="map-overlay">
-<div id="routeInfo" class="route-info">
-<div><div class="route-km">DISTANCIA • PRECIO ESTIMADO</div><div class="route-dist" id="kmText">0.0 km</div></div>
-<div class="route-price" id="priceText">$0</div>
-</div>
-</div>
-
-<div class="loc-toast" id="locToast">📍 Ubicándote en Dolores Hidalgo...</div>
-
+<div id="map"><div class="loc-toast" id="locToast">📍 Ubicándote en Dolores Hidalgo...</div></div>
 <div class="bottom-sheet">
-<div class="brand"><div class="brand-dot">K</div><h1>KIGO <span>Transporte</span></h1></div>
-
-<div class="field">
-<label>¿DÓNDE TE RECOGEMOS?</label>
-<div class="input-box" id="boxPick"><div class="dot pick"></div><input id="pickup" placeholder="Tu ubicación actual"><button class="btn-clear" id="clearPick">×</button></div>
+<div id="routeInfo" class="route-info"><div><div class="route-km">DISTANCIA ESTIMADA • PRECIO</div><div class="route-dist" id="kmText">0 km</div></div><div class="route-price" id="priceText">$0</div></div>
+<div class="field"><label>¿DÓNDE TE RECOGEMOS?</label><div class="input-box" id="boxPick"><div class="dot pick"></div><input id="pickup" placeholder="Escribe aquí de dónde te recogemos"><button class="btn-clear" id="clearPick">×</button></div></div>
+<div class="field"><label>¿A DÓNDE VAS?</label><div class="input-box" id="boxDest"><div class="dot dest"></div><input id="destino" placeholder="Escribe aquí a dónde quieres ir"><button class="btn-clear" id="clearDest">×</button></div></div>
+<button class="btn-iniciar" id="btnIniciar" disabled><span class="icon-btn">➤</span> INICIAR</button>
 </div>
-
-<div class="field">
-<label>¿A DÓNDE VAS?</label>
-<div class="input-box" id="boxDest"><div class="dot dest"></div><input id="destino" placeholder="Escribe tu destino en Dolores Hidalgo"></div>
-</div>
-
-<div class="vehiculos" id="vehiculos">
-<div class="v-card active" data-mult="1"><div class="ico">🛺</div><div class="name">MOTO</div></div>
-<div class="v-card" data-mult="1.3"><div class="ico">🚗</div><div class="name">AUTO</div></div>
-<div class="v-card" data-mult="1.8"><div class="ico">🚐</div><div class="name">CAMIONETA</div></div>
-<div class="v-card" data-mult="2.2"><div class="ico">📦</div><div class="name">CARGA</div></div>
-</div>
-
-<button class="btn-iniciar" id="btnIniciar" disabled>INICIAR VIAJE</button>
-</div>
-
 <script>
-// CONFIG
-const DOLORES = { lat: 21.1585, lng: -100.9340 };
-let map, directionsService, directionsRenderer, autocompletePick, autocompleteDest, markerPick, markerDest;
-let currentMult = 1;
-let kmGlobal = 0;
-
-function initMap() {
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: DOLORES,
-    zoom: 14,
-    disableDefaultUI: true,
-    styles: [
-      { featureType: "poi", stylers: [{ visibility: "off" }] },
-      { featureType: "transit", stylers: [{ visibility: "off" }] }
-    ]
-  });
-
-  directionsService = new google.maps.DirectionsService();
-  directionsRenderer = new google.maps.DirectionsRenderer({
-    map: map,
-    suppressMarkers: true,
-    polylineOptions: { strokeColor: "#0A0A0A", strokeWeight: 5, strokeOpacity: 0.9 }
-  });
-
-  // Radar lluvia (capa de precipitación de OpenWeather - visual)
-  // Es overlay gratuito
-  const rainMap = new google.maps.ImageMapType({
-    getTileUrl: function(coord, zoom) {
-      return `https://tile.openweathermap.org/map/precipitation_new/${zoom}/${coord.x}/${coord.y}.png?appid=439d4b804bc8187953eb36d2a8c26a02`;
-    },
-    tileSize: new google.maps.Size(256, 256),
-    opacity: 0.6,
-    name: "Lluvia"
-  });
+const DOLORES={lat:21.1585,lng:-100.9340};
+let map,directionsService,directionsRenderer,autocompletePick,autocompleteDest,markerPick,markerDest;
+function initMap(){
+  map=new google.maps.Map(document.getElementById("map"),{center:DOLORES,zoom:14,disableDefaultUI:true});
+  directionsService=new google.maps.DirectionsService();
+  directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#00C853",strokeWeight:6,strokeOpacity:0.95}});
+  const rainMap=new google.maps.ImageMapType({getTileUrl:(c,z)=>`https://tile.openweathermap.org/map/precipitation_new/${z}/${c.x}/${c.y}.png?appid=439d4b804bc8187953eb36d2a8c26a02`,tileSize:new google.maps.Size(256,256),opacity:0.55});
   map.overlayMapTypes.push(rainMap);
-
-  // Autocomplete
-  autocompletePick = new google.maps.places.Autocomplete(document.getElementById("pickup"), {
-    componentRestrictions: { country: ["mx"] },
-    bounds: new google.maps.LatLngBounds(
-      new google.maps.LatLng(20.9, -101.2),
-      new google.maps.LatLng(21.4, -100.6)
-    ),
-    strictBounds: false
+  autocompletePick=new google.maps.places.Autocomplete(document.getElementById("pickup"),{componentRestrictions:{country:["mx"]}});
+  autocompleteDest=new google.maps.places.Autocomplete(document.getElementById("destino"),{componentRestrictions:{country:["mx"]}});
+  autocompletePick.addListener("place_changed",()=>{
+    let p=autocompletePick.getPlace(); if(!p.geometry)return;
+    setPickup(p.geometry.location); if(document.getElementById("destino").value)calcRoute();
   });
-  autocompleteDest = new google.maps.places.Autocomplete(document.getElementById("destino"), {
-    componentRestrictions: { country: ["mx"] },
-    bounds: new google.maps.LatLngBounds(
-      new google.maps.LatLng(20.9, -101.2),
-      new google.maps.LatLng(21.4, -100.6)
-    )
+  autocompleteDest.addListener("place_changed",()=>{
+    let p=autocompleteDest.getPlace(); if(!p.geometry)return;
+    setDest(p.geometry.location); calcRoute();
   });
-
-  autocompletePick.addListener("place_changed", onPickChanged);
-  autocompleteDest.addListener("place_changed", onDestChanged);
-
-  // Intentar ubicación
   pedirUbicacion();
 }
-
-function pedirUbicacion() {
-  const toast = document.getElementById("locToast");
-  toast.style.display = "block";
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(pos => {
-      const p = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      map.setCenter(p);
-      map.setZoom(16);
-      setPickupMarker(p, "Tu ubicación");
-      reverseGeocode(p);
-      toast.style.display = "none";
-    }, () => {
-      toast.innerText = "Activa tu ubicación para mejor precisión";
-      setTimeout(()=>toast.style.display="none", 3000);
-      map.setCenter(DOLORES);
-    });
-  }
+function pedirUbicacion(){
+  const t=document.getElementById("locToast"); t.style.display="block";
+  if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>{
+    const p={lat:pos.coords.latitude,lng:pos.coords.longitude}; map.setCenter(p); map.setZoom(16); setPickup(p); reverse(p); t.style.display="none";
+  },()=>{map.setCenter(DOLORES); t.style.display="none";});}
 }
-
-function reverseGeocode(latlng) {
-  new google.maps.Geocoder().geocode({ location: latlng }, (res, status) => {
-    if (status === "OK" && res[0]) {
-      document.getElementById("pickup").value = res[0].formatted_address;
-      document.getElementById("clearPick").classList.add("show");
-    }
-  });
+function reverse(ll){ new google.maps.Geocoder().geocode({location:ll},(r,s)=>{if(s==="OK"&&r[0]){document.getElementById("pickup").value=r[0].formatted_address; document.getElementById("clearPick").classList.add("show");}});}
+function setPickup(pos){
+  if(markerPick)markerPick.setMap(null);
+  markerPick=new google.maps.Marker({position:pos,map:map,icon:{url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#00C853" fill-opacity="0.2"/><circle cx="20" cy="20" r="10" fill="#00C853" stroke="white" stroke-width="3"/><path d="M20 8 L24 14 L20 12 L16 14 Z" fill="#00C853"/></svg>'),scaledSize:new google.maps.Size(40,40),anchor:new google.maps.Point(20,20)}});
 }
-
-function setPickupMarker(pos, title) {
-  if (markerPick) markerPick.setMap(null);
-  markerPick = new google.maps.Marker({ position: pos, map: map, title: title, icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: "#0A0A0A", fillOpacity: 1, strokeColor: "#FFD60A", strokeWeight: 3 } });
+function setDest(pos){
+  if(markerDest)markerDest.setMap(null);
+  markerDest=new google.maps.Marker({position:pos,map:map,icon:{url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="50" viewBox="0 0 40 50"><path d="M20 0 C9 0 0 9 0 18 C0 30 20 50 20 50 C20 50 40 30 40 18 C40 9 31 0 20 0 Z" fill="#FF1744"/><circle cx="20" cy="18" r="8" fill="white"/></svg>'),scaledSize:new google.maps.Size(40,50),anchor:new google.maps.Point(20,50)}});
 }
-
-function setDestMarker(pos) {
-  if (markerDest) markerDest.setMap(null);
-  markerDest = new google.maps.Marker({ position: pos, map: map, icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: "#FFD60A", fillOpacity: 1, strokeColor: "#0A0A0A", strokeWeight: 3 } });
-}
-
-function onPickChanged() {
-  let place = autocompletePick.getPlace();
-  if (!place.geometry) return;
-  setPickupMarker(place.geometry.location, "Recogida");
-  document.getElementById("clearPick").classList.add("show");
-  if (document.getElementById("destino").value) calcRoute();
-}
-
-function onDestChanged() {
-  let place = autocompleteDest.getPlace();
-  if (!place.geometry) return;
-  setDestMarker(place.geometry.location);
-  calcRoute();
-}
-
-function calcRoute() {
-  let pick = document.getElementById("pickup").value;
-  let dest = document.getElementById("destino").value;
-  if (!pick ||!dest) return;
-  directionsService.route({ origin: pick, destination: dest, travelMode: google.maps.TravelMode.DRIVING }, (result, status) => {
-    if (status === "OK") {
-      directionsRenderer.setDirections(result);
-      let leg = result.routes[0].legs[0];
-      let km = leg.distance.value / 1000;
-      kmGlobal = km;
-      let precioBase = 25; // base
-      let porKm = 9;
-      let total = (precioBase + km * porKm) * currentMult;
-      document.getElementById("kmText").innerText = leg.distance.text + " • " + leg.duration.text;
-      document.getElementById("priceText").innerText = "$" + Math.round(total);
+function calcRoute(){
+  let pick=document.getElementById("pickup").value; let dest=document.getElementById("destino").value; if(!pick||!dest)return;
+  directionsService.route({origin:pick,destination:dest,travelMode:google.maps.TravelMode.DRIVING},(res,status)=>{
+    if(status==="OK"){
+      directionsRenderer.setDirections(res);
+      let leg=res.routes[0].legs[0]; let km=leg.distance.value/1000;
+      let total=25 + km*9;
+      document.getElementById("kmText").innerText=leg.distance.text+" • "+leg.duration.text;
+      document.getElementById("priceText").innerText="$"+Math.round(total);
       document.getElementById("routeInfo").classList.add("show");
-      document.getElementById("btnIniciar").disabled = false;
+      document.getElementById("btnIniciar").disabled=false;
     }
   });
 }
-
-// UI
-document.getElementById("clearPick").onclick = () => {
-  document.getElementById("pickup").value = "";
-  document.getElementById("clearPick").classList.remove("show");
-  if (markerPick) markerPick.setMap(null);
-  document.getElementById("routeInfo").classList.remove("show");
-  document.getElementById("btnIniciar").disabled = true;
-};
-document.getElementById("pickup").addEventListener("focus", ()=>document.getElementById("boxPick").classList.add("focus"));
-document.getElementById("pickup").addEventListener("blur", ()=>document.getElementById("boxPick").classList.remove("focus"));
-document.getElementById("destino").addEventListener("focus", ()=>document.getElementById("boxDest").classList.add("focus"));
-document.getElementById("destino").addEventListener("blur", ()=>document.getElementById("boxDest").classList.remove("focus"));
-
-document.querySelectorAll(".v-card").forEach(c=>{
-  c.onclick=()=>{
-    document.querySelectorAll(".v-card").forEach(x=>x.classList.remove("active"));
-    c.classList.add("active");
-    currentMult = parseFloat(c.dataset.mult);
-    if(kmGlobal>0) calcRoute();
-  }
-});
-
+document.getElementById("clearPick").onclick=()=>{document.getElementById("pickup").value=""; document.getElementById("clearPick").classList.remove("show"); if(markerPick)markerPick.setMap(null); document.getElementById("routeInfo").classList.remove("show"); document.getElementById("btnIniciar").disabled=true;};
+document.getElementById("clearDest").onclick=()=>{document.getElementById("destino").value=""; document.getElementById("clearDest").classList.remove("show"); if(markerDest)markerDest.setMap(null); document.getElementById("routeInfo").classList.remove("show"); document.getElementById("btnIniciar").disabled=true;};
+document.getElementById("pickup").addEventListener("input",()=>{document.getElementById("clearPick").classList.toggle("show", document.getElementById("pickup").value.length>0)});
+document.getElementById("destino").addEventListener("input",()=>{document.getElementById("clearDest").classList.toggle("show", document.getElementById("destino").value.length>0)});
+document.getElementById("boxPick").onclick=()=>document.getElementById("boxPick").classList.add("focus");
+document.getElementById("boxDest").onclick=()=>document.getElementById("boxDest").classList.add("focus");
 document.getElementById("btnIniciar").onclick=()=>{
-  let pick = document.getElementById("pickup").value;
-  let dest = document.getElementById("destino").value;
-  let price = document.getElementById("priceText").innerText;
-  alert(`Viaje Kigo:\nDe: ${pick}\nA: ${dest}\nPrecio: ${price}\n\nAquí conectamos con tu panel de conductores.`);
-  // Aquí lo mandas a tu siguiente página: /solicitar/ o guardas en Firebase
-  // window.location.href = `/cliente/solicitar.html?pick=${pick}&dest=${dest}&price=${price}`
+  let p=document.getElementById("pickup").value; let d=document.getElementById("destino").value; let pr=document.getElementById("priceText").innerText;
+  alert("Viaje Kigo:\nDe: "+p+"\nA: "+d+"\nPrecio: "+pr);
 };
 </script>
-
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap" async defer></script>
 </body>
 </html>
