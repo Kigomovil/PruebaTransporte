@@ -9,107 +9,135 @@
 :root{--yellow:#FFD60A;--black:#0A0A0A;--white:#fff;--gray:#F5F5F7}
 body{background:#fff;height:100dvh;overflow:hidden;display:flex;flex-direction:column}
 #map{flex:1;position:relative;background:#e5e7eb;min-height:54vh}
-.bottom-sheet{background:#fff;border-radius:28px 28px 0 0;box-shadow:0 -15px 40px rgba(0,0,0,.15);padding:14px 18px 20px;z-index:3;margin-top:-18px;max-height:46dvh;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.route-info{background:#fff;border-radius:16px;padding:12px 16px;display:none;align-items:center;justify-content:space-between;margin-bottom:14px;border:1.5px solid #f0f0f0;box-shadow:0 4px 12px rgba(0,0,0,.05)}
+.bottom-sheet{background:#fff;border-radius:28px 28px 0 0;box-shadow:0 -15px 40px rgba(0,0,0,.15);padding:14px 18px 20px;z-index:3;margin-top:-18px;max-height:46dvh;overflow-y:auto}
+.route-info{background:#fff;border-radius:16px;padding:10px 16px;display:none;justify-content:center;align-items:center;text-align:center;margin-bottom:14px;border:1.5px solid #f0f0f0;box-shadow:0 4px 12px rgba(0,0,0,.05)}
 .route-info.show{display:flex}
 .route-km{font-size:9px;font-weight:800;letter-spacing:1px;color:#9ca3af}
-.route-dist{font-size:12px;font-weight:800;color:var(--black);margin-top:2px}
-.route-price{font-size:20px;font-weight:900;color:#FFD60A;text-shadow:none}
+.route-dist{font-size:14px;font-weight:900;color:var(--black);margin-top:2px}
 .field{position:relative;margin-bottom:12px}
 .field label{font-size:9px;font-weight:800;letter-spacing:1px;opacity:.45;margin-bottom:5px;display:block}
-.input-box{display:flex;align-items:center;gap:10px;background:var(--gray);border:2px solid transparent;border-radius:16px;height:54px;padding:0 14px;transition:.2s}
+.input-box{display:flex;align-items:center;gap:10px;background:var(--gray);border:2px solid transparent;border-radius:16px;height:54px;padding:0 14px}
 .input-box.focus{border-color:var(--yellow);background:#fff}
 .input-box input{flex:1;border:none;background:transparent;outline:none;font-weight:600;font-size:14px}
 .btn-clear{width:28px;height:28px;border-radius:50%;background:#fff;border:1px solid #e5e7eb;display:none;align-items:center;justify-content:center;cursor:pointer;font-weight:800}
 .btn-clear.show{display:flex}
-.btn-iniciar{width:100%;height:56px;border-radius:18px;background:var(--yellow);color:var(--black);border:none;font-weight:900;font-size:15px;letter-spacing:.6px;cursor:pointer;box-shadow:0 10px 20px rgba(255,214,10,.35);margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-iniciar{width:100%;height:56px;border-radius:18px;background:var(--yellow);color:var(--black);border:none;font-weight:900;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 10px 20px rgba(255,214,10,.35)}
 .btn-iniciar:disabled{background:#e5e7eb;color:#9ca3af;box-shadow:none}
-.icon-btn{width:28px;height:28px;background:var(--black);color:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900}
-.dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
-.dot.pick{background:#00C853;box-shadow:0 0 0 4px rgba(0,200,83,.15)}
-.dot.dest{background:#FF1744;box-shadow:0 0 0 4px rgba(255,23,68,.15)}
-.weather-card{position:absolute;top:12px;right:12px;z-index:10;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);color:var(--black);border-radius:16px;padding:8px 12px;display:flex;align-items:center;gap:8px;border:1px solid rgba(0,0,0,.08);box-shadow:0 6px 20px rgba(0,0,0,.12)}
-.weather-card.temp{font-weight:900;font-size:14px;color:var(--black)}
-.weather-card.cond{font-size:8px;opacity:.6;font-weight:800;letter-spacing:.6px;text-transform:uppercase}
-.weather-icon{width:26px;height:26px;display:flex;align-items:center;justify-content:center}
-.loc-toast{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:var(--black);color:#fff;padding:8px 14px;border-radius:30px;font-size:11px;font-weight:600;z-index:5;display:none}
+.icon-btn{width:28px;height:28px;background:var(--black);color:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.dot{width:11px;height:11px;border-radius:50%}
+.dot.pick{background:#00C853}.dot.dest{background:#FF1744}
+.weather-card{position:absolute;top:12px;right:12px;z-index:10;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-radius:16px;padding:8px 12px;display:flex;align-items:center;gap:8px;border:1px solid rgba(0,0,0,.08);box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.weather-icon{width:26px;height:26px}.temp{font-weight:900;font-size:14px}.cond{font-size:8px;opacity:.6;font-weight:800;text-transform:uppercase}
+
+/* SEGUNDA PANTALLA */
+#screen2{position:fixed;inset:0;background:#fff;z-index:20;transform:translateY(100%);transition:.35s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+#screen2.open{transform:translateY(0)}
+.s2-head{display:flex;align-items:center;gap:12px;padding:18px 16px;border-bottom:1px solid #f0f0f0}
+.back-btn{width:38px;height:38px;border-radius:12px;background:var(--gray);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;font-weight:800}
+.s2-title{font-weight:900;font-size:15px}
+.s2-body{padding:18px 16px;flex:1;overflow:auto}
+.opt-card{border:2px solid #f0f0f0;border-radius:18px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;cursor:pointer;transition:.2s}
+.opt-card.active{border-color:var(--yellow);background:#FFFEF0;box-shadow:0 8px 20px rgba(255,214,10,.25)}
+.opt-left{display:flex;align-items:center;gap:12px}
+.opt-icon{width:46px;height:46px;border-radius:14px;background:var(--black);display:flex;align-items:center;justify-content:center}
+.opt-name{font-weight:800;font-size:14px}
+.opt-sub{font-size:10px;opacity:.5;font-weight:700;margin-top:2px}
+.opt-price{font-weight:900;font-size:16px;color:var(--black);text-align:right}
+.opt-disc{font-size:11px;color:#9ca3af;text-decoration:line-through;font-weight:700}
+.btn-continuar{margin:12px 16px 20px;height:56px;border-radius:18px;background:var(--black);color:#fff;border:none;font-weight:900;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-continuar:disabled{background:#e5e7eb;color:#9ca3af}
 </style>
 </head>
 <body>
 <div id="map">
 <div class="weather-card" id="weatherCard" style="display:none"><div class="weather-icon" id="weatherIcon"></div><div><div class="temp" id="weatherTemp">--°</div><div class="cond" id="weatherCond">--</div></div></div>
-<div class="loc-toast" id="locToast">📍 Ubicándote...</div>
 </div>
 <div class="bottom-sheet">
-<div id="routeInfo" class="route-info"><div><div class="route-km">DISTANCIA ESTIMADA • PRECIO</div><div class="route-dist" id="kmText">0 km</div></div><div class="route-price" id="priceText">$0 MXN</div></div>
+<div id="routeInfo" class="route-info"><div><div class="route-km">DISTANCIA ESTIMADA</div><div class="route-dist" id="kmText">0 km</div></div></div>
 <div class="field"><label>¿DÓNDE TE RECOGEMOS?</label><div class="input-box" id="boxPick"><div class="dot pick"></div><input id="pickup" placeholder="Escribe aquí de dónde te recogemos"><button class="btn-clear" id="clearPick">×</button></div></div>
 <div class="field"><label>¿A DÓNDE VAS?</label><div class="input-box" id="boxDest"><div class="dot dest"></div><input id="destino" placeholder="Escribe aquí a dónde quieres ir"><button class="btn-clear" id="clearDest">×</button></div></div>
-<button class="btn-iniciar" id="btnIniciar" disabled><span class="icon-btn">➤</span> INICIAR</button>
+<button class="btn-iniciar" id="btnIniciar" disabled><span class="icon-btn" style="color:#fff">➤</span> INICIAR</button>
 </div>
+
+<div id="screen2">
+<div class="s2-head"><button class="back-btn" id="btnBack">←</button><div class="s2-title">Elige tu viaje</div></div>
+<div class="s2-body">
+<div class="opt-card" id="optMoto" onclick="selectOpt('moto')">
+<div class="opt-left"><div class="opt-icon">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M5 20a2 2 0 110-4 2 2 0 010 4zm13 0a2 2 0 110-4 2 2 0 010 4zM7 14l3-6h5l1 3h3v3H7z"/></svg>
+</div><div><div class="opt-name">Moto</div><div class="opt-sub">Rápido y económico • 2 min</div></div></div>
+<div><div class="opt-price" id="priceMoto">$0 MXN</div><div class="opt-disc" id="discMoto">$0 MXN</div></div>
+</div>
+<div class="opt-card" id="optCarro" onclick="selectOpt('carro')">
+<div class="opt-left"><div class="opt-icon" style="background:#FFD60A">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="black"><path d="M5 11l1.5-4.5h11L19 11v6H5v-6zm2.5 2a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm9 0a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"/></svg>
+</div><div><div class="opt-name">Carro</div><div class="opt-sub">Cómodo y seguro • 3 min</div></div></div>
+<div><div class="opt-price" id="priceCarro">$0 MXN</div><div class="opt-disc" id="discCarro">$0 MXN</div></div>
+</div>
+</div>
+<button class="btn-continuar" id="btnContinuar" disabled>CONTINUAR ➤</button>
+</div>
+
 <script>
 const DOLORES={lat:21.1585,lng:-100.9340};
-let map,directionsService,directionsRenderer,autocompletePick,autocompleteDest,markerPick,markerDest;
+let map,directionsService,directionsRenderer,autocompletePick,autocompleteDest,markerPick,markerDest,kmGlobal=0,selected="";
 function initMap(){
   map=new google.maps.Map(document.getElementById("map"),{center:DOLORES,zoom:14,disableDefaultUI:true});
   directionsService=new google.maps.DirectionsService();
-  directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#00C853",strokeWeight:5,strokeOpacity:0.9}});
-  const rainMap=new google.maps.ImageMapType({getTileUrl:(c,z)=>`https://tile.openweathermap.org/map/precipitation_new/${z}/${c.x}/${c.y}.png?appid=439d4b804bc8187953eb36d2a8c26a02`,tileSize:new google.maps.Size(256,256),opacity:0.55});
-  map.overlayMapTypes.push(rainMap);
+  directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#00C853",strokeWeight:5}});
+  const rain=new google.maps.ImageMapType({getTileUrl:(c,z)=>`https://tile.openweathermap.org/map/precipitation_new/${z}/${c.x}/${c.y}.png?appid=439d4b804bc8187953eb36d2a8c26a02`,tileSize:new google.maps.Size(256,256),opacity:0.55}); map.overlayMapTypes.push(rain);
   autocompletePick=new google.maps.places.Autocomplete(document.getElementById("pickup"),{componentRestrictions:{country:["mx"]}});
   autocompleteDest=new google.maps.places.Autocomplete(document.getElementById("destino"),{componentRestrictions:{country:["mx"]}});
   autocompletePick.addListener("place_changed",()=>{let p=autocompletePick.getPlace();if(!p.geometry)return;setPickup(p.geometry.location);document.getElementById("clearPick").classList.add("show");if(document.getElementById("destino").value)calcRoute();});
   autocompleteDest.addListener("place_changed",()=>{let p=autocompleteDest.getPlace();if(!p.geometry)return;setDest(p.geometry.location);document.getElementById("clearDest").classList.add("show");calcRoute();});
   pedirUbicacion(); cargarClima();
+  document.getElementById("clearPick").onclick=()=>{document.getElementById("pickup").value="";if(markerPick)markerPick.setMap(null);this.classList.remove("show");};
+  document.getElementById("clearDest").onclick=()=>{document.getElementById("destino").value="";if(markerDest)markerDest.setMap(null);this.classList.remove("show");};
+  document.getElementById("btnIniciar").onclick=()=>{openScreen2();};
+  document.getElementById("btnBack").onclick=()=>{document.getElementById("screen2").classList.remove("open");};
+  document.getElementById("boxPick").onclick=()=>document.getElementById("pickup").focus();
+  document.getElementById("boxDest").onclick=()=>document.getElementById("destino").focus();
 }
-function pedirUbicacion(){const t=document.getElementById("locToast");t.style.display="block";if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>{const p={lat:pos.coords.latitude,lng:pos.coords.longitude};map.setCenter(p);map.setZoom(16);setPickup(p);reverse(p);t.style.display="none";},()=>{map.setCenter(DOLORES);t.style.display="none";});}}
+function pedirUbicacion(){if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>{const p={lat:pos.coords.latitude,lng:pos.coords.longitude};map.setCenter(p);map.setZoom(16);setPickup(p);reverse(p);},()=>map.setCenter(DOLORES));}}
 function reverse(ll){new google.maps.Geocoder().geocode({location:ll},(r,s)=>{if(s==="OK"&&r[0]){document.getElementById("pickup").value=r[0].formatted_address;document.getElementById("clearPick").classList.add("show");}});}
 function setPickup(pos){
   if(markerPick)markerPick.setMap(null);
-  markerPick=new google.maps.Marker({position:pos,map:map,icon:{url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path d="M14 0C6.27 0 0 6.1 0 13.6C0 23.8 14 36 14 36S28 23.8 28 13.6C28 6.1 21.73 0 14 0ZM14 18.2C11.2 18.2 8.9 15.9 8.9 13.1C8.9 10.3 11.2 8 14 8C16.8 8 19.1 10.3 19.1 13.1C19.1 15.9 16.8 18.2 14 18.2Z" fill="%2300C853"/><circle cx="14" cy="13.1" r="3.5" fill="white"/></svg>'),scaledSize:new google.maps.Size(28,36),anchor:new google.maps.Point(14,36)}});
+  markerPick=new google.maps.Marker({position:pos,map:map,icon:{url:"data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='34' viewBox='0 0 28 34'%3E%3Cpath d='M14 0C6.27 0 0 6.1 0 13.6c0 10.2 14 20.4 14 20.4S28 23.8 28 13.6C28 6.1 21.73 0 14 0z' fill='%2300C853'/%3E%3Ccircle cx='14' cy='13.5' r='5' fill='white'/%3E%3C/svg%3E",scaledSize:new google.maps.Size(28,34),anchor:new google.maps.Point(14,34)}});
 }
 function setDest(pos){
   if(markerDest)markerDest.setMap(null);
-  markerDest=new google.maps.Marker({position:pos,map:map,icon:{url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path d="M14 0C6.27 0 0 6.1 0 13.6C0 23.8 14 36 14 36S28 23.8 28 13.6C28 6.1 21.73 0 14 0ZM14 18.2C11.2 18.2 8.9 15.9 8.9 13.1C8.9 10.3 11.2 8 14 8C16.8 8 19.1 10.3 19.1 13.1C19.1 15.9 16.8 18.2 14 18.2Z" fill="%23FF1744"/><circle cx="14" cy="13.1" r="3.5" fill="white"/></svg>'),scaledSize:new google.maps.Size(28,36),anchor:new google.maps.Point(14,36)}});
+  markerDest=new google.maps.Marker({position:pos,map:map,icon:{url:"data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='34' viewBox='0 0 28 34'%3E%3Cpath d='M14 0C6.27 0 0 6.1 0 13.6c0 10.2 14 20.4 14 20.4S28 23.8 28 13.6C28 6.1 21.73 0 14 0z' fill='%23FF1744'/%3E%3Ccircle cx='14' cy='13.5' r='5' fill='white'/%3E%3C/svg%3E",scaledSize:new google.maps.Size(28,34),anchor:new google.maps.Point(14,34)}});
 }
 function calcRoute(){
-  let pick=document.getElementById("pickup").value; let dest=document.getElementById("destino").value; if(!pick||!dest)return;
-  directionsService.route({origin:pick,destination:dest,travelMode:google.maps.TravelMode.DRIVING},(result,status)=>{
-    if(status==="OK"){
-      directionsRenderer.setDirections(result);
-      let leg=result.routes[0].legs[0]; let km=leg.distance.value/1000;
-      let total=25+km*9;
-      document.getElementById("kmText").innerText=leg.distance.text+" • "+leg.duration.text;
-      document.getElementById("priceText").innerText="$"+Math.round(total)+" MXN";
-      document.getElementById("routeInfo").classList.add("show");
-      document.getElementById("btnIniciar").disabled=false;
+  const o=document.getElementById("pickup").value; const d=document.getElementById("destino").value; if(!o||!d)return;
+  directionsService.route({origin:o,destination:d,travelMode:"DRIVING"},(res,status)=>{
+    if(status==="OK"){directionsRenderer.setDirections(res); const leg=res.routes[0].legs[0]; const km=leg.distance.value/1000; kmGlobal=km;
+      document.getElementById("kmText").innerText=km.toFixed(1)+" km"; document.getElementById("routeInfo").classList.add("show"); document.getElementById("btnIniciar").disabled=false;
+      updatePrices(km);
     }
   });
 }
-document.getElementById("clearPick").onclick=()=>{document.getElementById("pickup").value="";document.getElementById("clearPick").classList.remove("show");if(markerPick)markerPick.setMap(null);document.getElementById("routeInfo").classList.remove("show");document.getElementById("btnIniciar").disabled=true;};
-document.getElementById("clearDest").onclick=()=>{document.getElementById("destino").value="";document.getElementById("clearDest").classList.remove("show");if(markerDest)markerDest.setMap(null);document.getElementById("routeInfo").classList.remove("show");document.getElementById("btnIniciar").disabled=true;};
-document.getElementById("pickup").addEventListener("focus",()=>document.getElementById("boxPick").classList.add("focus"));
-document.getElementById("pickup").addEventListener("blur",()=>document.getElementById("boxPick").classList.remove("focus"));
-document.getElementById("destino").addEventListener("focus",()=>document.getElementById("boxDest").classList.add("focus"));
-document.getElementById("destino").addEventListener("blur",()=>document.getElementById("boxDest").classList.remove("focus"));
-document.getElementById("btnIniciar").onclick=()=>{let p=document.getElementById("pickup").value;let d=document.getElementById("destino").value;let pr=document.getElementById("priceText").innerText; alert(`Viaje Kigo\nDe: ${p}\nA: ${d}\n${pr}`);};
-
-async function cargarClima(){
-  try{
-    let res=await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${DOLORES.lat}&lon=${DOLORES.lng}&units=metric&lang=es&appid=439d4b804bc8187953eb36d2a8c26a02`);
-    let data=await res.json();
-    let temp=Math.round(data.main.temp);
-    let cond=data.weather[0].main.toLowerCase();
-    let desc=data.weather[0].description;
-    document.getElementById("weatherTemp").innerText=temp+"°";
-    document.getElementById("weatherCond").innerText=desc;
+function updatePrices(km){
+  let baseMoto=Math.max(25, km*9); let baseCarro=Math.max(40, km*14);
+  let discMoto=baseMoto*1.25; let discCarro=baseCarro*1.25;
+  document.getElementById("priceMoto").innerText="$"+Math.round(baseMoto)+" MXN";
+  document.getElementById("discMoto").innerText="$"+Math.round(discMoto)+" MXN";
+  document.getElementById("priceCarro").innerText="$"+Math.round(baseCarro)+" MXN";
+  document.getElementById("discCarro").innerText="$"+Math.round(discCarro)+" MXN";
+}
+function openScreen2(){if(kmGlobal===0)calcRoute(); updatePrices(kmGlobal); document.getElementById("screen2").classList.add("open");}
+function selectOpt(t){selected=t; document.querySelectorAll(".opt-card").forEach(c=>c.classList.remove("active")); document.getElementById(t==="moto"?"optMoto":"optCarro").classList.add("active"); document.getElementById("btnContinuar").disabled=false;}
+function cargarClima(){
+  fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${DOLORES.lat}&lon=${DOLORES.lng}&units=metric&lang=es&appid=439d4b804bc8187953eb36d2a8c26a02`)
+ .then(r=>r.json()).then(d=>{
+    if(!d.main)return;
     document.getElementById("weatherCard").style.display="flex";
-    let iconSvg="";
-    if(cond.includes("clear")) iconSvg=`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="#FFD60A"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="#FFD60A" stroke-width="2" stroke-linecap="round"/></svg>`;
-    else if(cond.includes("cloud")) iconSvg=`<svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.9-1A4 4 0 0 1 17 18H7z" fill="#9ca3af"/></svg>`;
-    else if(cond.includes("rain")||cond.includes("drizzle")) iconSvg=`<svg viewBox="0 0 24 24"><path d="M7 16a4 4 0 0 1 0-8 5 5 0 0 1 9.9-1A4 4 0 0 1 17 16H7z" fill="#6b7280"/><path d="M8 19l1 2M12 19l1 2M16 19l1 2" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"/></svg>`;
-    else iconSvg=`<svg viewBox="0 0 24 24"><path d="M3 15a4 4 0 0 0 4h9a5 5 0 1 0-.1-9.999 5.002 5.002 0 0 0-9.78 2.096A4.001 4.001 0 0 0 3 15z" fill="#9ca3af"/></svg>`;
-    document.getElementById("weatherIcon").innerHTML=iconSvg;
-  }catch(e){ console.log("clima error",e); }
+    document.getElementById("weatherTemp").innerText=Math.round(d.main.temp)+"°";
+    document.getElementById("weatherCond").innerText=d.weather[0].description;
+    let icon="sun"; let cond=d.weather[0].main.toLowerCase();
+    if(cond.includes("cloud"))icon="cloud"; if(cond.includes("rain"))icon="rain";
+    document.getElementById("weatherIcon").innerHTML=icon==="sun"?`<svg viewBox="0 0 24 24" fill="none" stroke="#FFD60A" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>`:icon==="cloud"?`<svg viewBox="0 0 24 24" fill="#9ca3af"><path d="M7 18a4 4 0 01-.88-7.88A5 5 0 0117 10a3 3 0 010 6H7z"/></svg>`:`<svg viewBox="0 0 24 24" fill="#60a5fa"><path d="M16 13v-1a4 4 0 00-4-4 4 4 0 00-3.8 2.7A3 3 0 007 18h9a2 2 0 000-4h-1z"/><path d="M8 19l1 2M12 19l1 2M16 19l1 2" stroke="#60a5fa"/></svg>`;
+  });
 }
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap" async defer></script>
