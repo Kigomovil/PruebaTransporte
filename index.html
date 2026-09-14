@@ -36,12 +36,25 @@ body{background:#fff;height:100dvh;overflow:hidden;display:flex;flex-direction:c
 .opt-card.active.dot-select{background:var(--yellow);box-shadow:0 0 0 4px rgba(255,214,10,.35)}
 .btn-continuar{margin:12px 16px 20px;height:56px;border-radius:18px;background:var(--yellow);color:#000;border:none;font-weight:900;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
 .btn-continuar:disabled{background:#e5e7eb;color:#9ca3af}
-#screen3,#screen4{position:fixed;inset:0;background:#fff;z-index:30;transform:translateY(100%);transition:.35s;display:flex;flex-direction:column}
-#screen3.open,#screen4.open{transform:translateY(0)}
+#screen3,#screen4,#screen5{position:fixed;inset:0;background:#fff;z-index:30;transform:translateY(100%);transition:.35s;display:flex;flex-direction:column}
+#screen3.open,#screen4.open,#screen5.open{transform:translateY(0)}
 #map2,#map3{flex:1;position:relative}
 .s3-bottom{background:#fff;border-radius:24px 24px 0 0;margin-top:-20px;padding:16px 18px 22px;box-shadow:0 -10px 30px rgba(0,0,0,.12);z-index:2}
 .addr{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:8px}
 .meta{font-size:11px;font-weight:800;opacity:.6;display:flex;gap:10px}
+/* ALERTA CENTRO */
+#toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(0.9);background:#111;color:#fff;padding:16px 20px;border-radius:16px;font-size:13px;font-weight:700;text-align:center;z-index:100;display:none;box-shadow:0 20px 40px rgba(0,0,0,.3);max-width:80%}
+#toast.show{display:block;animation:pop.3s forwards}
+@keyframes pop{to{transform:translate(-50%,-50%) scale(1)}}
+/* BUSCANDO CONDUCTOR */
+.search-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:30px}
+.lupa{width:110px;height:110px;border-radius:50%;background:var(--yellow);display:flex;align-items:center;justify-content:center;position:relative;animation:pulse 1.6s infinite}
+.lupa svg{animation:rotateLupa 2s linear infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,214,10,.6)}70%{box-shadow:0 0 0 25px rgba(255,214,10,0)}100%{box-shadow:0 0 0 0 rgba(255,214,10,0)}}
+@keyframes rotateLupa{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+.bar{width:220px;height:6px;background:#f0f0f0;border-radius:10px;overflow:hidden}
+.bar-fill{height:100%;width:0%;background:var(--yellow);border-radius:10px;animation:load 3s ease-in-out infinite}
+@keyframes load{0%{width:10%}50%{width:80%}100%{width:95%}}
 </style>
 </head>
 <body>
@@ -50,14 +63,14 @@ body{background:#fff;height:100dvh;overflow:hidden;display:flex;flex-direction:c
 <div id="routeInfo" class="route-info"><div style="text-align:center"><div style="font-size:9px;letter-spacing:1px;opacity:.4;font-weight:800">DISTANCIA ESTIMADA</div><div class="route-dist" id="kmText">0 km</div></div></div>
 <div class="field"><label>¿DÓNDE TE RECOGEMOS?</label><div class="input-box"><div class="dot pick"></div><input id="pickup" placeholder="Escribe aquí de dónde te recogemos"><button class="btn-clear" id="clearPick">×</button></div></div>
 <div class="field"><label>¿A DÓNDE VAS?</label><div class="input-box"><div class="dot dest"></div><input id="destino" placeholder="Escribe aquí a dónde quieres ir"><button class="btn-clear" id="clearDest">×</button></div></div>
-<button class="btn-iniciar" id="btnIniciar" disabled>INICIAR ➤</button>
+<button class="btn-iniciar" id="btnIniciar">INICIAR ➤</button>
 </div>
 
 <div id="screen2">
 <div class="s2-head"><button class="back-btn" id="btnBack"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button><div style="font-weight:900">Elige tu viaje</div></div>
 <div class="s2-body">
 <div class="opt-card" id="optMoto" onclick="selectOpt('moto')">
-<div class="opt-left"><div class="opt-img-box"><img class="opt-img" src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png"></div><div><div class="opt-name">Moto</div><div class="opt-sub">1 pasajero • Rápido</div></div></div>
+<div class="opt-left"><div class="opt-img-box"><img class="opt-img" src="https://cdn-icons-png.flaticon.com/512/3771/3771600.png"></div><div><div class="opt-name">Moto</div><div class="opt-sub">1 pasajero • Rápido</div></div></div>
 <div class="opt-right"><div class="opt-price" id="priceMoto">$35 MXN</div><div class="opt-disc" id="discMoto">$50 MXN</div></div><div class="dot-select"></div>
 </div>
 <div class="opt-card" id="optCarro" onclick="selectOpt('carro')">
@@ -65,7 +78,7 @@ body{background:#fff;height:100dvh;overflow:hidden;display:flex;flex-direction:c
 <div class="opt-right"><div class="opt-price" id="priceCarro">$65 MXN</div><div class="opt-disc" id="discCarro">$85 MXN</div></div><div class="dot-select"></div>
 </div>
 </div>
-<button class="btn-continuar" id="btnContinuar" disabled>CONTINUAR ➤</button>
+<button class="btn-continuar" id="btnContinuar">CONTINUAR ➤</button>
 </div>
 
 <div id="screen3">
@@ -80,48 +93,71 @@ body{background:#fff;height:100dvh;overflow:hidden;display:flex;flex-direction:c
 <div class="s3-bottom"><div class="addr" id="addr3">Selecciona punto rojo</div><div class="meta"><span id="kmText3">0 km</span><span id="timeText3">0 min</span><span id="priceText3" style="color:#000;font-weight:900">$0 MXN</span></div><button class="btn-iniciar" id="btnConfirmarDest" style="margin-top:12px">CONFIRMAR DESTINO ➤</button></div>
 </div>
 
+<div id="screen5">
+<div style="padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #f0f0f0"><button class="back-btn" onclick="document.getElementById('screen5').classList.remove('open')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button><div style="font-weight:900;font-size:14px">Buscando conductor</div></div>
+<div class="search-wrap">
+<div class="lupa">
+<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M21 21l-4.2-4.2"/></svg>
+</div>
+<div style="text-align:center"><div style="font-weight:900;font-size:18px">Buscando conductor cercano...</div><div style="font-size:11px;opacity:.6;margin-top:6px;font-weight:700" id="searchInfo">0 km • $0 MXN • Moto</div></div>
+<div class="bar"><div class="bar-fill"></div></div>
+<div style="font-size:11px;opacity:.5;font-weight:700">Estamos asignando el mejor conductor para ti</div>
+</div>
+</div>
+
+<div id="toast"></div>
+
 <script>
 const DOLORES={lat:21.1585,lng:-100.9340};
 let map,map2,map3,directionsService,directionsRenderer,directionsRenderer2,directionsRenderer3,autocompletePick,autocompleteDest,markerPick,markerDest,markerPick2,markerDest3,geocoder,kmGlobal=0,timeGlobal="",selected="",pickPos=null,destPos=null;
 
+function showToast(msg){
+  const t=document.getElementById("toast"); t.innerText=msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2500);
+}
 function initMap(){
   map=new google.maps.Map(document.getElementById("map"),{center:DOLORES,zoom:14,disableDefaultUI:true});
   geocoder=new google.maps.Geocoder(); directionsService=new google.maps.DirectionsService();
-  directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#00C853",strokeWeight:6,strokeOpacity:1,zIndex:10}});
+  directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#00C853",strokeWeight:6,strokeOpacity:1}});
   autocompletePick=new google.maps.places.Autocomplete(document.getElementById("pickup"),{componentRestrictions:{country:["mx"]}});
   autocompleteDest=new google.maps.places.Autocomplete(document.getElementById("destino"),{componentRestrictions:{country:["mx"]}});
-  autocompletePick.addListener("place_changed",()=>{let p=autocompletePick.getPlace();if(!p.geometry)return;pickPos=p.geometry.location;setPickup(pickPos);document.getElementById("clearPick").classList.add("show");if(destPos)calcRoute();checkIniciar();});
-  autocompleteDest.addListener("place_changed",()=>{let p=autocompleteDest.getPlace();if(!p.geometry)return;destPos=p.geometry.location;setDest(destPos);document.getElementById("clearDest").classList.add("show");if(pickPos)calcRoute();checkIniciar();});
+  autocompletePick.addListener("place_changed",()=>{let p=autocompletePick.getPlace();if(!p.geometry)return;pickPos=p.geometry.location;setPickup(pickPos);document.getElementById("clearPick").classList.add("show");if(destPos)calcRoute();});
+  autocompleteDest.addListener("place_changed",()=>{let p=autocompleteDest.getPlace();if(!p.geometry)return;destPos=p.geometry.location;setDest(destPos);document.getElementById("clearDest").classList.add("show");if(pickPos)calcRoute();});
   pedirUbicacion(); cargarClima();
-  document.getElementById("btnIniciar").onclick=openScreen2;
+  document.getElementById("btnIniciar").onclick=()=>{
+    if(!pickPos ||!destPos ||!document.getElementById("pickup").value ||!document.getElementById("destino").value){
+      showToast("Debes llenar dónde te recogemos y a dónde vas");
+      return;
+    }
+    openScreen2();
+  };
   document.getElementById("btnBack").onclick=()=>document.getElementById("screen2").classList.remove("open");
   document.getElementById("btnBack3").onclick=()=>document.getElementById("screen3").classList.remove("open");
   document.getElementById("btnBack4").onclick=()=>document.getElementById("screen4").classList.remove("open");
-  document.getElementById("btnContinuar").onclick=openScreen3;
+  document.getElementById("btnContinuar").onclick=()=>{
+    if(!selected){ showToast("Debes seleccionar un vehículo: moto o carro"); return; }
+    openScreen3();
+  };
   document.getElementById("btnConfirmarPick").onclick=()=>{document.getElementById("screen3").classList.remove("open");openScreen4();};
-  document.getElementById("btnConfirmarDest").onclick=()=>alert("Viaje confirmado: "+kmGlobal.toFixed(1)+" km - "+selected);
+  document.getElementById("btnConfirmarDest").onclick=()=>{
+    document.getElementById("searchInfo").innerText=`${kmGlobal.toFixed(1)} km • ${document.getElementById("priceText3").innerText} • ${selected.toUpperCase()}`;
+    document.getElementById("screen5").classList.add("open");
+  };
+  document.getElementById("clearPick").onclick=function(){document.getElementById("pickup").value="";pickPos=null;if(markerPick)markerPick.setMap(null);this.classList.remove("show");};
+  document.getElementById("clearDest").onclick=function(){document.getElementById("destino").value="";destPos=null;if(markerDest)markerDest.setMap(null);this.classList.remove("show");};
 }
 function pedirUbicacion(){if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>{const ll=new google.maps.LatLng(pos.coords.latitude,pos.coords.longitude);pickPos=ll;map.setCenter(ll);map.setZoom(16);setPickup(ll);reverse(ll);});}}
 function reverse(ll){geocoder.geocode({location:ll},(r,s)=>{if(s==="OK"&&r[0]){document.getElementById("pickup").value=r[0].formatted_address;document.getElementById("clearPick").classList.add("show");}});}
-function setPickup(pos){
-  if(markerPick)markerPick.setMap(null);
-  markerPick=new google.maps.Marker({position:pos,map:map,icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:"#00C853",fillOpacity:1,strokeColor:"#fff",strokeWeight:3}});
-}
-function setDest(pos){
-  if(markerDest)markerDest.setMap(null);
-  markerDest=new google.maps.Marker({position:pos,map:map,icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:"#FF1744",fillOpacity:1,strokeColor:"#fff",strokeWeight:3}});
-}
+function setPickup(pos){if(markerPick)markerPick.setMap(null);markerPick=new google.maps.Marker({position:pos,map:map,icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:"#00C853",fillOpacity:1,strokeColor:"#fff",strokeWeight:3}});}
+function setDest(pos){if(markerDest)markerDest.setMap(null);markerDest=new google.maps.Marker({position:pos,map:map,icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:"#FF1744",fillOpacity:1,strokeColor:"#fff",strokeWeight:3}});}
 function calcRoute(){
   if(!pickPos||!destPos)return;
   directionsService.route({origin:pickPos,destination:destPos,travelMode:google.maps.TravelMode.DRIVING},(res,stat)=>{
     if(stat==="OK"){
       directionsRenderer.setDirections(res);
-      const leg=res.routes[0].legs[0];
-      kmGlobal=leg.distance.value/1000; timeGlobal=leg.duration.text;
-      document.getElementById("kmText").innerText=leg.distance.text;
-      document.getElementById("routeInfo").classList.add("show");
-      updatePrices();
-      syncBottomData(leg);
+      const leg=res.routes[0].legs[0]; kmGlobal=leg.distance.value/1000; timeGlobal=leg.duration.text;
+      document.getElementById("kmText").innerText=leg.distance.text; document.getElementById("routeInfo").classList.add("show");
+      updatePrices(); syncBottomData(leg);
     }
   });
 }
@@ -141,14 +177,12 @@ function syncBottomData(leg){
   if(document.getElementById("timeText2")) document.getElementById("timeText2").innerText=t;
   if(document.getElementById("timeText3")) document.getElementById("timeText3").innerText=t;
 }
-function checkIniciar(){document.getElementById("btnIniciar").disabled=!(pickPos&&destPos);}
 function selectOpt(t){
   selected=t;
   document.querySelectorAll(".opt-card").forEach(c=>c.classList.remove("active"));
   document.getElementById(t==="moto"?"optMoto":"optCarro").classList.add("active");
-  document.getElementById("btnContinuar").disabled=false;
 }
-function openScreen2(){if(!pickPos||!destPos)return; document.getElementById("screen2").classList.add("open");}
+function openScreen2(){document.getElementById("screen2").classList.add("open");}
 function openScreen3(){
   document.getElementById("screen2").classList.remove("open");
   document.getElementById("screen3").classList.add("open");
@@ -188,7 +222,7 @@ function cargarClima(){
   if(!navigator.geolocation)return;
   navigator.geolocation.getCurrentPosition(pos=>{
     fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&units=metric&lang=es&appid=439d4b804bc8187953eb36d2a8c26a02`)
-   .then(r=>r.json()).then(d=>{
+  .then(r=>r.json()).then(d=>{
       document.getElementById("weatherCard").style.display="flex";
       document.getElementById("weatherTemp").innerText=Math.round(d.main.temp)+"°";
       document.getElementById("weatherCond").innerText=d.weather[0].description;
