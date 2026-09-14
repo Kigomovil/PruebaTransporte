@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Kigo Driver</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<style>
+*{box-sizing:border-box;font-family:system-ui}body{margin:0;background:#111;color:#fff;overflow:hidden}
+.app{max-width:480px;margin:0 auto;background:#0f0f0f;height:100dvh;display:flex;flex-direction:column;position:relative}
+#map{width:100%;height:100%}
+.header{background:#fff;color:#111;padding:14px 16px;display:flex;align-items:center;gap:12px;border-radius:0 0 20px 20px;z-index:10;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.avatar{width:46px;height:46px;border-radius:50%;border:2px solid #E53935;object-fit:cover}
+.btn-toggle{width:100%;height:62px;border-radius:16px;border:none;font-weight:900;font-size:16px;cursor:pointer;transition:.3s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-toggle.on{background:#16a34a;color:#fff;box-shadow:0 0 20px rgba(22,163,74,.4)}
+.btn-toggle.off{background:#2a2a2a;color:#999;border:1px solid #333}
+.card-dark{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:16px;padding:14px;margin-bottom:10px}
+.new-ride{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.92);display:none;flex-direction:column;padding:20px}
+.new-ride.show{display:flex}
+.pulse{width:90px;height:90px;border-radius:50%;background:#E53935;display:flex;align-items:center;justify-content:center;margin:20px auto;animation:pulseRed 1.2s infinite}
+@keyframes pulseRed{0%{box-shadow:0 0 0 0 rgba(229,57,53,.6)}70%{box-shadow:0 0 0 25px rgba(229,57,53,0)}100%{box-shadow:0 0 0 0 rgba(229,57,53,0)}}
+.chat-box{background:#111;border-radius:14px;padding:10px;border:1px solid #222;max-height:140px;overflow-y:auto;margin-bottom:10px}
+.msg{font-size:13px;padding:8px 10px;border-radius:12px;margin-bottom:6px;max-width:80%}
+.msg.me{background:#E53935;color:#fff;margin-left:auto}
+.msg.other{background:#222;color:#fff}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div id="screenLogin" style="display:flex;flex-direction:column;height:100%;background:#fff;color:#111;padding:30px">
+<div style="text-align:center;margin-top:40px"><div style="width:70px;height:70px;background:#E53935;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:34px;color:#fff">K</div><h2 style="margin:0;font-weight:900">Kigo Driver</h2><p style="opacity:.6;font-size:12px;font-weight:700">Panel de Conductores</p></div>
+<div style="margin-top:40px"><div style="font-size:11px;font-weight:800;opacity:.6;margin-bottom:6px">EMAIL</div><input id="email" type="email" placeholder="conductor@kigo.com" style="width:100%;height:52px;border-radius:12px;border:1.5px solid #ddd;padding:0 14px;font-weight:600"><div style="font-size:11px;font-weight:800;opacity:.6;margin:14px 0 6px">CONTRASEÑA</div><input id="pass" type="password" placeholder="••••••••" style="width:100%;height:52px;border-radius:12px;border:1.5px solid #ddd;padding:0 14px;font-weight:600"><button onclick="login()" style="width:100%;height:56px;background:#E53935;color:#fff;border:none;border-radius:14px;font-weight:900;margin-top:20px;font-size:15px">ENTRAR</button><p style="text-align:center;font-size:10px;opacity:.5;margin-top:14px">Si no tienes cuenta, contacta al Admin</p><p id="loginError" style="color:#E53935;font-size:12px;font-weight:700;text-align:center;display:none;margin-top:10px"></p></div>
+</div>
+
+<div id="screenHome" style="display:none;flex-direction:column;height:100%">
+<div class="header">
+<img id="dAvatar" class="avatar" src="https://i.pravatar.cc/100?img=15">
+<div style="flex:1"><div id="dName" style="font-weight:900;font-size:14px">Carlos</div><div id="dPlate" style="font-size:11px;opacity:.6">MX-54-K9 • Moto</div></div>
+<button onclick="logout()" style="width:36px;height:36px;border-radius:50%;background:#f5f5f5;border:1px solid #eee">↪️</button>
+</div>
+<div style="flex:1;position:relative">
+<div id="map"></div>
+<div style="position:absolute;bottom:12px;left:12px;right:12px;z-index:5">
+<button id="btnDisponible" class="btn-toggle off" onclick="toggleDisponible()">⚫ ESTOY DESCONECTADO</button>
+<div style="display:flex;gap:8px;margin-top:10px">
+<div class="card-dark" style="flex:1;text-align:center"><div style="font-size:10px;opacity:.5;font-weight:800">HOY</div><div id="gananciaHoy" style="font-weight:900;font-size:18px;color:#16a34a">$0</div><div style="font-size:10px;opacity:.6">ganancias</div></div>
+<div class="card-dark" style="flex:1;text-align:center"><div style="font-size:10px;opacity:.5;font-weight:800">VIAJES</div><div id="viajesHoy" style="font-weight:900;font-size:18px">0</div><div style="font-size:10px;opacity:.6">completados</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="screenEnViaje" style="display:none;flex-direction:column;height:100%">
+<div style="background:#fff;color:#111;padding:12px 16px;display:flex;align-items:center;gap:10px"><button onclick="cancelarEnViaje()" style="width:36px;height:36px;border-radius:50%;border:1px solid #eee;background:#f5f5f5">✕</button><div><div id="enViajeEstado" style="font-weight:900;font-size:13px">En camino al cliente</div><div id="enViajeDist" style="font-size:11px;opacity:.6">0.8 km</div></div></div>
+<div style="flex:1;position:relative"><div id="mapViaje" style="width:100%;height:100%"></div></div>
+<div style="background:#111;padding:16px;border-radius:22px 22px 0 0;margin-top:-22px;z-index:5;max-height:55vh;overflow:auto">
+<div class="card-dark"><div style="font-size:10px;opacity:.5">CLIENTE</div><div id="clienteDestino" style="font-weight:800;font-size:13px">Lindavista</div><div id="clienteOrigen" style="font-size:11px;opacity:.6">Centro</div></div>
+<div style="font-size:9px;font-weight:800;opacity:.5;margin:10px 0 6px;letter-spacing:1px">CHAT CON CLIENTE</div>
+<div class="chat-box" id="chatBoxDriver"><div class="msg other">Hola!</div></div>
+<div style="display:flex;gap:8px;margin-bottom:10px"><input id="chatInputDriver" placeholder="Mensaje..." style="flex:1;height:44px;border-radius:12px;background:#1c1c1c;border:1px solid #333;color:#fff;padding:0 12px"><button onclick="sendMsgDriver()" style="width:44px;height:44px;border-radius:12px;background:#E53935;border:none;color:#fff">➤</button></div>
+<button id="btnAccionViaje" onclick="accionViaje()" style="width:100%;height:54px;border-radius:14px;background:#16a34a;color:#fff;border:none;font-weight:900">YA LLEGUÉ</button>
+</div>
+</div>
+
+<div id="popupNuevoViaje" class="new-ride">
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center">
+<div class="pulse">🔔</div>
+<h1 style="font-size:26px;font-weight:900;margin:10px 0">¡NUEVO VIAJE!</h1>
+<div id="nuevoTipo" style="background:#E53935;display:inline-block;padding:6px 14px;border-radius:999px;font-weight:900;font-size:12px;margin:0 auto">MOTO • $55 MXN</div>
+<div class="card-dark" style="margin-top:20px;text-align:left"><div style="font-size:10px;opacity:.5">ORIGEN</div><div id="nuevoOrigen" style="font-weight:800">Centro</div><div style="height:10px"></div><div style="font-size:10px;opacity:.5">DESTINO</div><div id="nuevoDestino" style="font-weight:800">Lindavista</div><div style="margin-top:10px;display:flex;justify-content:space-between"><span id="nuevoDist" style="font-size:12px;opacity:.7">1.2 km</span><span id="nuevoTiempo" style="font-size:12px;opacity:.7">5 min</span></div></div>
+<div style="margin-top:20px"><div id="countDown" style="font-size:42px;font-weight:900;color:#E53935">15</div><div style="font-size:10px;opacity:.6">SEGUNDOS PARA ACEPTAR</div></div>
+</div>
+<div style="display:flex;gap:12px"><button onclick="rechazarViaje()" style="flex:1;height:56px;border-radius:14px;background:#222;color:#fff;border:1px solid #333;font-weight:900">RECHAZAR</button><button onclick="aceptarViaje()" style="flex:2;height:56px;border-radius:14px;background:#16a34a;color:#fff;border:none;font-weight:900;font-size:16px">ACEPTAR VIAJE</button></div>
+</div>
+
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDjxi5qxVVbC7lufDPdBWRUzkiSZ2o9gnE",
+  authDomain: "kigo-transporte.firebaseapp.com",
+  databaseURL: "https://kigo-transporte-default-rtdb.firebaseio.com",
+  projectId: "kigo-transporte",
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+let driverData=null, driverUid=null, map=null, mapViaje=null, geocoder, directionsService, directionsRendererViaje, watchId=null, disponible=false, viajeActual=null, viajeActualId=null, countInterval=null, count=15, chatListenerDriver=null, viajesListener=null;
+
+function initMapsDriver(){
+  geocoder=new google.maps.Geocoder();
+  directionsService=new google.maps.DirectionsService();
+}
+
+function login(){
+  const email=document.getElementById("email").value.trim();
+  const pass=document.getElementById("pass").value.trim();
+  if(!email||!pass){ showError("Llena email y contraseña"); return; }
+  auth.signInWithEmailAndPassword(email,pass).then(cred=>{
+    driverUid=cred.user.uid;
+    db.ref('conductores/'+driverUid).once('value').then(snap=>{
+      if(!snap.exists()){ showError("No eres conductor registrado"); auth.signOut(); return; }
+      driverData=snap.val();
+      if(driverData.activo===false){ showError("Cuenta desactivada por Admin"); auth.signOut(); return; }
+      guardarSesion();
+      entrarHome();
+    });
+  }).catch(e=>{ showError(e.message); });
+}
+function showError(m){ const el=document.getElementById("loginError"); el.innerText=m; el.style.display="block"; }
+function guardarSesion(){ localStorage.setItem('kigo_driver_uid', driverUid); localStorage.setItem('kigo_driver_data', JSON.stringify(driverData)); }
+function cargarSesion(){
+  const uid=localStorage.getItem('kigo_driver_uid');
+  const data=localStorage.getItem('kigo_driver_data');
+  if(uid && data){
+    driverUid=uid; driverData=JSON.parse(data);
+    // verificar que sigue activo
+    db.ref('conductores/'+driverUid).once('value').then(snap=>{
+      if(snap.exists() && snap.val().activo!==false){
+        driverData=snap.val(); entrarHome();
+      }else{ logout(); }
+    });
+  }
+}
+function entrarHome(){
+  document.getElementById("screenLogin").style.display="none";
+  document.getElementById("screenHome").style.display="flex";
+  document.getElementById("dName").innerText=driverData.nombre||"Conductor";
+  document.getElementById("dPlate").innerText=(driverData.placa||"")+" • "+(driverData.tipo||"moto").toUpperCase();
+  document.getElementById("dAvatar").src=driverData.foto||"https://i.pravatar.cc/100?img=15";
+  if(!map){
+    map=new google.maps.Map(document.getElementById("map"),{center:{lat:21.1561,lng:-100.9333},zoom:15,disableDefaultUI:true});
+  }
+  iniciarUbicacion();
+  escucharViajes();
+  // restaurar estado disponible
+  const disp=localStorage.getItem('kigo_disponible');
+  if(disp==="true"){ disponible=true; actualizarBoton(); db.ref('conductores/'+driverUid).update({disponible:true, online:true}); }
+}
+
+function iniciarUbicacion(){
+  if(!navigator.geolocation) return;
+  watchId=navigator.geolocation.watchPosition(pos=>{
+    const lat=pos.coords.latitude, lng=pos.coords.longitude;
+    if(driverUid) db.ref('conductores/'+driverUid).update({lat:lat,lng:lng,lastUpdate:Date.now(),online:true});
+    if(map){ map.setCenter({lat:lat,lng:lng}); }
+  },null,{enableHighAccuracy:true,maximumAge:5000});
+}
+
+function toggleDisponible(){
+  disponible=!disponible;
+  localStorage.setItem('kigo_disponible', disponible);
+  actualizarBoton();
+  if(driverUid) db.ref('conductores/'+driverUid).update({disponible:disponible, online:true});
+}
+function actualizarBoton(){
+  const btn=document.getElementById("btnDisponible");
+  if(disponible){ btn.className="btn-toggle on"; btn.innerText="🟢 ESTOY DISPONIBLE"; }
+  else{ btn.className="btn-toggle off"; btn.innerText="⚫ ESTOY DESCONECTADO"; }
+}
+
+function escucharViajes(){
+  if(viajesListener) viajesListener.off();
+  viajesListener=db.ref('viajes').orderByChild('estado').equalTo('buscando');
+  viajesListener.on('value', snap=>{
+    if(!disponible) return;
+    if(viajeActual) return;
+    const viajes=snap.val(); if(!viajes) return;
+    // buscar viaje que sea de mi tipo
+    for(let id in viajes){
+      let v=viajes[id];
+      if(v.tipo===driverData.tipo || driverData.tipo==='ambos' ||!driverData.tipo){
+        mostrarNuevoViaje(id, v);
+        break;
+      }
+    }
+  });
+}
+
+function mostrarNuevoViaje(id, v){
+  viajeActual=v; viajeActualId=id;
+  document.getElementById("nuevoOrigen").innerText=v.origen;
+  document.getElementById("nuevoDestino").innerText=v.destino;
+  document.getElementById("nuevoDist").innerText=v.distKm+" km";
+  document.getElementById("nuevoTipo").innerText=v.tipo.toUpperCase()+" • $"+v.precio+" MXN";
+  document.getElementById("popupNuevoViaje").classList.add("show");
+  count=15; document.getElementById("countDown").innerText=count;
+  if(countInterval) clearInterval(countInterval);
+  countInterval=setInterval(()=>{ count--; document.getElementById("countDown").innerText=count; if(count<=0){ rechazarViaje(); } },1000);
+  // vibrar y sonido
+  if(navigator.vibrate) navigator.vibrate([500,200,500]);
+}
+
+function aceptarViaje(){
+  if(countInterval) clearInterval(countInterval);
+  db.ref('viajes/'+viajeActualId).update({
+    estado:'aceptado',
+    conductor:{
+      id:driverUid,
+      nombre:driverData.nombre,
+      foto:driverData.foto,
+      placa:driverData.placa,
+      vehiculo:driverData.vehiculo,
+      telefono:driverData.telefono,
+      rating:driverData.rating||4.9,
+      lat: driverData.lat,
+      lng: driverData.lng
+    },
+    aceptadoEn: Date.now()
+  });
+  db.ref('conductores/'+driverUid).update({ocupado:true, viajeActual:viajeActualId});
+  document.getElementById("popupNuevoViaje").classList.remove("show");
+  abrirEnViaje();
+}
+function rechazarViaje(){
+  if(countInterval) clearInterval(countInterval);
+  document.getElementById("popupNuevoViaje").classList.remove("show");
+  viajeActual=null; viajeActualId=null;
+}
+
+function abrirEnViaje(){
+  document.getElementById("screenHome").style.display="none";
+  document.getElementById("screenEnViaje").style.display="flex";
+  document.getElementById("clienteOrigen").innerText=viajeActual.origen;
+  document.getElementById("clienteDestino").innerText=viajeActual.destino;
+  document.getElementById("enViajeEstado").innerText="En camino al cliente";
+  setTimeout(()=>{
+    if(!mapViaje){
+      mapViaje=new google.maps.Map(document.getElementById("mapViaje"),{center:{lat:21.1561,lng:-100.9333},zoom:15,disableDefaultUI:true});
+      directionsRendererViaje=new google.maps.DirectionsRenderer({map:mapViaje,suppressMarkers:true,polylineOptions:{strokeColor:"#E53935",strokeWeight:6}});
+    }
+    // ruta al cliente
+    const origin=new google.maps.LatLng(driverData.lat||21.1561, driverData.lng||-100.9333);
+    const dest=new google.maps.LatLng(viajeActual.origenLat, viajeActual.origenLng);
+    directionsService.route({origin:origin,destination:dest,travelMode:google.maps.TravelMode.DRIVING,provideRouteAlternatives:true},(res,status)=>{
+      if(status==="OK"){
+        let best=res.routes[0]; let bestDist=best.legs[0].distance.value;
+        for(let r of res.routes){ if(r.legs[0].distance.value < bestDist){ best=r; bestDist=r.legs[0].distance.value; } }
+        directionsRendererViaje.setDirections(res);
+        directionsRendererViaje.setRouteIndex(res.routes.indexOf(best));
+      }
+    });
+  },300);
+  // chat listener
+  if(chatListenerDriver) chatListenerDriver.off();
+  chatListenerDriver=db.ref('viajes/'+viajeActualId+'/chat');
+  chatListenerDriver.on('child_added', snap=>{
+    const m=snap.val(); if(!m) return;
+    if(m.de==='cliente'){
+      const box=document.getElementById("chatBoxDriver");
+      const div=document.createElement("div"); div.className="msg other"; div.innerText=m.msg;
+      box.appendChild(div); box.scrollTop=box.scrollHeight;
+    }
+  });
+}
+
+let pasoViaje=0; // 0 yendo al cliente, 1 con cliente
+function accionViaje(){
+  if(pasoViaje===0){
+    // Ya llegué
+    document.getElementById("enViajeEstado").innerText="Cliente a bordo - yendo al destino";
+    document.getElementById("btnAccionViaje").innerText="FINALIZAR VIAJE";
+    document.getElementById("btnAccionViaje").style.background="#111";
+    pasoViaje=1;
+    // cambiar ruta al destino
+    const origin=new google.maps.LatLng(viajeActual.origenLat, viajeActual.origenLng);
+    const dest=new google.maps.LatLng(viajeActual.destLat, viajeActual.destLng);
+    directionsService.route({origin:origin,destination:dest,travelMode:google.maps.TravelMode.DRIVING,provideRouteAlternatives:true},(res,status)=>{
+      if(status==="OK"){
+        let best=res.routes[0]; let bestDist=best.legs[0].distance.value;
+        for(let r of res.routes){ if(r.legs[0].distance.value < bestDist){ best=r; bestDist=r.legs[0].distance.value; } }
+        directionsRendererViaje.setDirections(res);
+        directionsRendererViaje.setRouteIndex(res.routes.indexOf(best));
+      }
+    });
+    db.ref('viajes/'+viajeActualId).update({estado:'en_curso'});
+  }else{
+    // Finalizar
+    db.ref('viajes/'+viajeActualId).update({estado:'finalizado', finalizadoEn:Date.now()});
+    db.ref('conductores/'+driverUid).update({ocupado:false, viajeActual:null});
+    document.getElementById("screenEnViaje").style.display="none";
+    document.getElementById("screenHome").style.display="flex";
+    viajeActual=null; viajeActualId=null; pasoViaje=0;
+    document.getElementById("btnAccionViaje").innerText="YA LLEGUÉ";
+    document.getElementById("btnAccionViaje").style.background="#16a34a";
+    if(chatListenerDriver){ chatListenerDriver.off(); chatListenerDriver=null; }
+  }
+}
+function sendMsgDriver(){
+  const inp=document.getElementById("chatInputDriver"); if(!inp.value.trim()) return;
+  const msg=inp.value.trim();
+  const box=document.getElementById("chatBoxDriver");
+  const div=document.createElement("div"); div.className="msg me"; div.innerText=msg; box.appendChild(div); box.scrollTop=box.scrollHeight;
+  if(viajeActualId) db.ref('viajes/'+viajeActualId+'/chat').push({de:'conductor',msg:msg,t:Date.now()});
+  inp.value="";
+}
+function cancelarEnViaje(){ if(confirm("¿Cancelar viaje?")){ db.ref('viajes/'+viajeActualId).update({estado:'cancelado_conductor'}); db.ref('conductores/'+driverUid).update({ocupado:false, viajeActual:null}); document.getElementById("screenEnViaje").style.display="none"; document.getElementById("screenHome").style.display="flex"; } }
+
+function logout(){
+  if(confirm("¿Cerrar sesión?")){
+    localStorage.removeItem('kigo_driver_uid');
+    localStorage.removeItem('kigo_driver_data');
+    localStorage.removeItem('kigo_disponible');
+    if(viajesListener) viajesListener.off();
+    if(watchId) navigator.geolocation.clearWatch(watchId);
+    if(driverUid) db.ref('conductores/'+driverUid).update({online:false, disponible:false});
+    auth.signOut().then(()=>{ location.reload(); });
+  }
+}
+
+// Al cargar, intentar recuperar sesión
+window.onload=()=>{ cargarSesion(); initMapsDriver(); };
+</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMapsDriver"></script>
+</body>
+</html>
