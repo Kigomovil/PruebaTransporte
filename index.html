@@ -96,7 +96,7 @@
 </div>
 
 <div id="screenDriver">
-<div style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f0f0f0;background:#fff"><i data-lucide="car" style="width:18px;color:#16a34a"></i><div style="font-weight:900;font-size:14px">Tu conductor viene en camino</div></div>
+<div style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f0f0f0;background:#fff"><i data-lucide="car" style="width:18px;color:#16a34a"></i><div style="font-weight:900;font-size:14px">Tu conductor viene en camino</div><div id="etaTop" style="margin-left:auto;background:#16a34a;color:#fff;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:900">--</div></div>
 <div style="flex:1;position:relative"><div id="mapDriver"></div></div>
 <div style="background:#fff;border-radius:24px 24px 0 0;margin-top:-20px;padding:16px 18px 20px;box-shadow:0 -10px 30px rgba(0,0,0,.12);z-index:2;overflow:auto;max-height:65vh">
 <div id="driverCardContent" style="background:#fff;border-radius:22px;padding:16px;border:1px solid #f0f0f0;box-shadow:0 10px 30px rgba(0,0,0,.08);margin-bottom:12px"></div>
@@ -121,7 +121,7 @@ let db=null; try{ firebase.initializeApp(firebaseConfig); db=firebase.database()
 const CENTRO={lat:21.1561,lng:-100.9333};
 let pickupLat=null,pickupLng=null,destinationLat=null,destinationLng=null,pickupName="",destName="",tipo="",datosViaje={};
 let map=null, mapConfirm=null, mapDriver=null, geocoder, directionsService, directionsRenderer, directionsRendererConfirm, directionsRendererDriver;
-let pickupMarker=null, destinationMarker=null, markerConfirm=null;
+let pickupMarker=null, destinationMarker=null, markerConfirm=null, markerConductor=null, markerOrigenCliente=null;
 let autocompletePickup=null, autocompleteDest=null;
 let cfg = JSON.parse(localStorage.getItem('kigo_cfg')||'{"nombre":"Kigo Xpress","baseMoto":35,"baseCarro":55,"extraMoto":5,"extraCarro":8,"motoDisp":true,"carroDisp":true,"precioLeve":0,"precioMod":5,"precioFuerte":10,"lluviaNivel":"ninguna","lluviaAuto":true}');
 let finalPickupLat=null, finalPickupLng=null, viajeIdActual=null, viajeListener=null, chatListener=null;
@@ -245,6 +245,8 @@ function resetAppTotal(){
   if(viajeListener){ viajeListener.off(); viajeListener=null; }
   if(chatListener){ chatListener.off(); chatListener=null; }
   viajeIdActual=null;
+  if(markerConductor){ markerConductor.setMap(null); markerConductor=null; }
+  if(markerOrigenCliente){ markerOrigenCliente.setMap(null); markerOrigenCliente=null; }
   document.getElementById('pickupInput').value=""; document.getElementById('destinationInput').value="";
   document.getElementById('btnClearOrigen').style.display='none';
   document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
@@ -273,23 +275,33 @@ function confirmarViajeFinal(){
    timestamp: firebase.database.ServerValue.TIMESTAMP,
  };
  viajeIdActual = viaje.id;
+ localStorage.setItem('kigo_viaje_id', viaje.id);
  db.ref('viajes/'+viaje.id).set(viaje);
  document.getElementById('panel3').classList.remove('show');
  document.getElementById('screenBuscar').classList.add('show');
  document.getElementById('buscarInfo').innerText=`${datosViaje.distKm} km • $${precio} MXN • ${tipo.toUpperCase()} - Buscando conductor...`;
  if(window.lucide) lucide.createIcons();
+
+ // --- LISTENER PRINCIPAL ENLAZADO AL CONDUCTOR ---
  if(viajeListener) viajeListener.off();
  viajeListener = db.ref('viajes/'+viaje.id);
  viajeListener.on('value', snap=>{
    const data = snap.val(); if(!data) return;
-   if(data.estado==='aceptado' && data.conductor){ mostrarConductorEnCamino(data); }
+   // Cuando conductor acepta
+   if((data.estado==='aceptado' || data.estado==='recogiendo' || data.estado==='en_curso') && data.conductor){
+     mostrarConductorEnCamino(data);
+     actualizarMapaConductorTiempoReal(data);
+   }
+   if(data.estado==='finalizado'){
+     alert('Viaje finalizado ✅');
+     resetAppTotal();
+   }
  });
- // CHAT LISTENER - CORRECCIÓN
+
  if(chatListener) chatListener.off();
  chatListener = db.ref('viajes/'+viaje.id+'/chat');
  chatListener.on('child_added', snap=>{
    const m=snap.val(); if(!m) return;
-   // Solo mostrar mensajes del conductor, los del cliente ya se muestran al enviar
    if(m.de==='conductor'){
      const box=document.getElementById("chatBox");
      const div=document.createElement("div"); div.className="msg driver"; div.innerText=m.msg;
@@ -302,21 +314,46 @@ function mostrarConductorEnCamino(viaje){
  document.getElementById('screenBuscar').classList.remove('show');
  document.getElementById('screenDriver').classList.add('show');
  const cond = viaje.conductor;
+ const eta = viaje.etaTexto || '3-4 min';
+ const dist = viaje.distanciaRecoger || viaje.distKm+' km';
+ document.getElementById('etaTop').innerText = eta;
  document.getElementById('driverCardContent').innerHTML = `
    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
      <img src="${cond.foto||'https://i.pravatar.cc/100?img=15'}" style="width:54px;height:54px;border-radius:50%;border:2px solid #E53935">
-     <div style="flex:1"><div style="font-weight:900">${cond.nombre||'Conductor'} • ${cond.rating||'4.9'} ⭐</div><div style="font-size:11px;opacity:.6">Conductor verificado</div></div>
+     <div style="flex:1"><div style="font-weight:900">${cond.nombre||'Conductor'} • ${cond.rating||'4.9'} ⭐</div><div style="font-size:11px;opacity:.6">Conductor verificado • ${cond.vehiculo||'Moto'}</div></div>
      <a href="tel:${cond.telefono||''}" style="width:36px;height:36px;background:#e8f5e9;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none">📞</a>
    </div>
-   <div style="background:#E53935;color:#fff;border-radius:14px;padding:10px 14px;display:flex;justify-content:space-between;margin-bottom:12px"><div><div style="font-size:9px;opacity:.8">LLEGA EN</div><div style="font-weight:900;font-size:18px">3-4 min</div></div><div style="font-weight:800">🟢 En camino</div></div>
+   <div style="background:#E53935;color:#fff;border-radius:14px;padding:10px 14px;display:flex;justify-content:space-between;margin-bottom:12px"><div><div style="font-size:9px;opacity:.8">LLEGA EN</div><div style="font-weight:900;font-size:18px">${eta}</div><div style="font-size:10px;opacity:.9">${dist} • ${viaje.estado}</div></div><div style="font-weight:800;text-align:right">🟢<br>En camino</div></div>
    <div style="display:flex;justify-content:space-between;background:#f9f9f9;border-radius:12px;padding:10px;border:1px solid #f0f0f0"><div><span style="font-size:10px;opacity:.6">VEHÍCULO</span><br><b>${cond.vehiculo||'Honda CB 125'}</b></div><div style="text-align:right"><span style="font-size:10px;opacity:.6">PLACA</span><br><b>${cond.placa||'MX-54-K9'}</b></div></div>
+   <div style="margin-top:10px;display:flex;gap:6px"><span style="background:#16a34a;color:#fff;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800">● EN VIVO</span><span style="background:#111;color:#fff;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800">📍 ${viaje.origen.substring(0,30)}</span></div>
  `;
- setTimeout(()=>{
-   if(!mapDriver){ mapDriver=new google.maps.Map(document.getElementById("mapDriver"),{center:{lat:viaje.origenLat,lng:viaje.origenLng},zoom:15,disableDefaultUI:true}); directionsRendererDriver=new google.maps.DirectionsRenderer({map:mapDriver,suppressMarkers:true,polylineOptions:{strokeColor:"#E53935",strokeWeight:6}}); }
-   mapDriver.setCenter({lat:viaje.origenLat,lng:viaje.origenLng});
-   if(directionsRenderer) directionsRendererDriver.setDirections(directionsRenderer.getDirections());
- },400);
  if(window.lucide) lucide.createIcons();
+}
+
+function actualizarMapaConductorTiempoReal(viaje){
+  if(!mapDriver){
+    mapDriver=new google.maps.Map(document.getElementById("mapDriver"),{center:{lat:viaje.origenLat,lng:viaje.origenLng},zoom:15,disableDefaultUI:true});
+    directionsRendererDriver=new google.maps.DirectionsRenderer({map:mapDriver,suppressMarkers:true,polylineOptions:{strokeColor:"#E53935",strokeWeight:6}});
+  }
+  const posConductor = {lat: viaje.conductor.lat, lng: viaje.conductor.lng};
+  const posCliente = {lat: viaje.origenLat, lng: viaje.origenLng};
+
+  // marcador conductor moviéndose
+  if(!markerConductor){
+    markerConductor = new google.maps.Marker({position:posConductor,map:mapDriver,icon:{path:google.maps.SymbolPath.CIRCLE,scale:10,fillColor:"#E53935",fillOpacity:1,strokeColor:"#fff",strokeWeight:3}});
+  } else {
+    markerConductor.setPosition(posConductor);
+  }
+  if(!markerOrigenCliente){
+    markerOrigenCliente = new google.maps.Marker({position:posCliente,map:mapDriver,icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:"#16a34a",fillOpacity:1,strokeColor:"#fff",strokeWeight:2}});
+  }
+
+  // trazar ruta conductor -> cliente en tiempo real
+  if(viaje.estado==='aceptado' || viaje.estado==='recogiendo'){
+    directionsService.route({origin:new google.maps.LatLng(posConductor.lat,posConductor.lng), destination:new google.maps.LatLng(posCliente.lat,posCliente.lng), travelMode:google.maps.TravelMode.DRIVING},(res,status)=>{ if(status==="OK") directionsRendererDriver.setDirections(res); });
+  } else if(viaje.estado==='en_curso'){
+    directionsService.route({origin:new google.maps.LatLng(posConductor.lat,posConductor.lng), destination:new google.maps.LatLng(viaje.destLat,viaje.destLng), travelMode:google.maps.TravelMode.DRIVING},(res,status)=>{ if(status==="OK") directionsRendererDriver.setDirections(res); });
+  }
 }
 
 function sendMsg(){
