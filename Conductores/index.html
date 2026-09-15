@@ -3,22 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Kigo Driver - Enlazado</title>
+<title>Kigo Driver - Corregido</title>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <style>
 *{box-sizing:border-box;font-family:system-ui}body{margin:0;background:#0a0a0a;color:#fff;overflow:hidden}
 .app{max-width:480px;margin:0 auto;background:#0f0f0f;height:100dvh;display:flex;flex-direction:column}
-#map{width:100%;height:100%;background:#1a1a1a}
-.header{background:#fff;color:#111;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:0 0 20px 20px;z-index:10}
-.left-info{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
-.avatar{width:36px;height:36px;border-radius:50%;border:2px solid #E53935;object-fit:cover}
-.btn-online{height:28px;padding:0 14px;border-radius:999px;border:none;font-weight:900;font-size:10px;cursor:pointer;display:flex;gap:5px}
+#map{width:100%;height:100%;display:block;background:#1a1a1a}
+.header{background:#fff;color:#111;padding:10px 12px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;border-radius:0 0 20px 20px;z-index:10}
+.left-info{display:flex;align-items:center;gap:8px;min-width:0;justify-self:start}
+.center-info{display:flex;justify-content:center;align-items:center}
+.right-info{display:flex;justify-content:flex-end}
+.avatar{width:36px;height:36px;border-radius:50%;border:2px solid #E53935;object-fit:cover;flex-shrink:0}
+.btn-online{height:28px;padding:0 16px;border-radius:999px;border:none;font-weight:900;font-size:10px;cursor:pointer;display:flex;align-items:center;gap:6px;letter-spacing:.4px}
 .btn-online.on{background:#16a34a;color:#fff;box-shadow:0 0 10px #16a34a;border:1px solid #16a34a}
 .btn-online.off{background:#1a1a1a;color:#ff4444;border:1px solid #ff4444}
 .btn-icon{width:32px;height:32px;border-radius:50%;background:#f2f2f2;border:1px solid #e5e5e5;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.map-container{width:100%;flex:1;min-height:320px;height:38vh;position:relative;background:#1a1a1a}
+.map-container{width:100%;flex:1;min-height:320px;height:38vh;position:relative;background:#1a1a1a;display:block}
 .pedido-item{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:16px;padding:12px;margin-bottom:12px}
 .badge-neon{display:inline-block;padding:4px 10px;border-radius:999px;font-size:10px;font-weight:900}
 .badge-price{background:rgba(22,163,74,.15);color:#16a34a;border:1px solid rgba(22,163,74,.4)}
@@ -29,50 +31,45 @@
 .card-dark{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:18px;padding:14px;margin-bottom:10px}
 .modal{position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.85);display:none;align-items:flex-end;justify-content:center}
 .modal.show{display:flex}
-.modal-full{position:fixed;inset:0;z-index:9000;background:#fff;color:#111;display:none;flex-direction:column}
-.modal-full.show{display:flex}
 .modal-content{width:100%;max-width:480px;background:#151515;border-radius:22px 22px 0 0;padding:20px 16px 30px;border:1px solid #2a2a2a;color:#fff}
+.modal-full{position:fixed;inset:0;z-index:9000;background:#ffffff;color:#111;display:none;flex-direction:column}
+.modal-full.show{display:flex}
 .input{width:100%;height:50px;border-radius:12px;border:1.5px solid #333;background:#0f0f0f;color:#fff;padding:0 14px;font-weight:600;margin-top:10px}
-.chat-box{background:#f5f5f5;border-radius:14px;padding:10px;border:1px solid #eee;flex:1;overflow-y:auto;margin:10px 0}
-.msg{font-size:12px;padding:8px 12px;border-radius:14px;margin-bottom:6px;max-width:80%;font-weight:600}
+.chat-box{flex:1;background:#f7f7f7;border-radius:0;padding:12px;border-top:1px solid #eee;border-bottom:1px solid #eee;overflow-y:auto}
+.msg{font-size:12px;padding:8px 12px;border-radius:14px;margin-bottom:8px;max-width:80%;font-weight:600;word-break:break-word}
 .msg.me{background:#E53935;color:#fff;margin-left:auto}
-.msg.other{background:#222;color:#fff}
+.msg.other{background:#fff;border:1px solid #e5e5e5;color:#111}
 .quick{padding:8px 12px;border-radius:999px;border:1px solid #ddd;background:#fff;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
+.quick:active{background:#111;color:#fff}
 </style>
 </head>
 <body>
 <div class="app">
 <div id="screenHome" style="display:flex;flex-direction:column;height:100dvh">
 <div class="header">
-<div class="left-info"><img id="dAvatar" class="avatar" src="https://i.pravatar.cc/100?img=15"><div style="min-width:0"><div id="dName" style="font-weight:900;font-size:11px">Conductor Kigo</div><div id="dMoto" style="font-size:9px;opacity:.7;font-weight:700">Honda CB 125 • MOTO</div></div></div>
-<button id="btnDisponible" class="btn-online on" onclick="toggleDisponible()" style="position:absolute;left:50%;transform:translateX(-50%)"><span>●</span><span id="txtOnline">EN LÍNEA</span></button>
-<button class="btn-icon" onclick="openAjustes()"><i class="material-icons" style="font-size:18px;color:#111">settings</i></button>
+<div class="left-info"><img id="dAvatar" class="avatar" src="https://i.pravatar.cc/100?img=15"><div style="min-width:0"><div id="dName" style="font-weight:900;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Conductor Kigo</div><div id="dMoto" style="font-size:9px;opacity:.7;font-weight:700">Honda CB 125 • MOTO</div></div></div>
+<div class="center-info"><button id="btnDisponible" class="btn-online on" onclick="toggleDisponible()"><span>●</span><span id="txtOnline">EN LÍNEA</span></button></div>
+<div class="right-info"><button class="btn-icon" onclick="openAjustes()"><i class="material-icons" style="font-size:18px;color:#111">settings</i></button></div>
 </div>
+
 <div class="map-container"><div id="map"></div><div id="mapLoading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#1a1a1a;font-size:11px;z-index:2">Cargando mapa...</div></div>
+
 <div style="background:#111;padding:12px 12px 20px;border-radius:22px 22px 0 0;margin-top:-18px;z-index:5;overflow:auto;max-height:45vh">
 <div style="font-size:9px;font-weight:800;letter-spacing:1px;opacity:.5;margin-bottom:8px">PEDIDO ACTIVO</div>
 <div id="pedidoActivoBox"><div style="text-align:center;padding:14px;background:#1c1c1c;border-radius:14px;border:1px dashed #333;font-size:12px;opacity:.6">Sin pedidos activos</div></div>
 <div style="font-size:9px;font-weight:800;letter-spacing:1px;opacity:.5;margin:14px 0 8px">PEDIDOS EN ESPERA</div>
-<div id="pedidosEsperaBox"></div>
+<div id="pedidosEsperaBox"><div style="text-align:center;padding:10px;font-size:11px;opacity:.4">Esperando pedidos...</div></div>
 </div>
 </div>
 
-<!-- AJUSTES -->
 <div id="modalAjustes" class="modal" onclick="if(event.target==this)closeAjustes()"><div class="modal-content"><div style="width:40px;height:4px;background:#333;border-radius:999px;margin:0 auto 16px"></div><h3 style="margin:0;font-weight:900">Ajustes</h3><input id="ajNombre" class="input" placeholder="Nombre"><input id="ajMoto" class="input" placeholder="Moto"><select id="ajTipo" class="input"><option value="moto">Moto</option><option value="carro">Carro</option></select><button onclick="guardarAjustes()" style="width:100%;height:54px;background:#E53935;color:#fff;border:none;border-radius:14px;font-weight:900;margin-top:16px">GUARDAR</button></div></div>
 
-<!-- CHAT PANTALLA BLANCA -->
 <div id="modalChat" class="modal-full">
-<div style="padding:14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #eee;background:#fff"><button onclick="closeChat()" style="width:32px;height:32px;border-radius:50%;border:1px solid #ddd;background:#fff"><i class="material-icons" style="font-size:18px">arrow_back</i></button><div><div style="font-weight:900;font-size:13px">Mensajes</div><div style="font-size:11px;opacity:.6">Cliente ↔ Conductor</div></div></div>
-<div id="chatBoxFull" class="chat-box" style="margin:0;border-radius:0;border:none"></div>
-<div style="padding:10px;display:flex;gap:6px;overflow:auto;border-top:1px solid #eee;background:#fafafa">
-<button class="quick" onclick="sendQuick('Ya voy en camino')">Ya voy en camino</button>
-<button class="quick" onclick="sendQuick('¿Dónde estás?')">¿Dónde estás?</button>
-<button class="quick" onclick="sendQuick('No te veo')">No te veo</button>
-<button class="quick" onclick="sendQuick('Llegué al punto')">Llegué al punto</button>
+<div style="padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #eee;background:#fff"><button onclick="closeChat()" style="width:36px;height:36px;border-radius:50%;border:1px solid #ddd;background:#fff;display:flex;align-items:center;justify-content:center"><i class="material-icons" style="font-size:20px">arrow_back</i></button><div><div style="font-weight:900;font-size:14px">Mensajes</div><div style="font-size:11px;opacity:.6">Cliente ↔ Conductor</div></div><div style="margin-left:auto;background:#16a34a;color:#fff;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800">● EN VIVO</div></div>
+<div id="chatBoxFull" class="chat-box"></div>
+<div style="padding:10px;display:flex;gap:6px;overflow-x:auto;background:#fafafa;border-top:1px solid #eee"><button class="quick" onclick="sendQuick('Ya voy en camino 🏍️')">Ya voy en camino</button><button class="quick" onclick="sendQuick('¿Dónde estás?')">¿Dónde estás?</button><button class="quick" onclick="sendQuick('No te veo')">No te veo</button><button class="quick" onclick="sendQuick('Llegué al punto')">Llegué al punto</button></div>
+<div style="padding:10px;display:flex;gap:8px;background:#fff;border-top:1px solid #eee"><input id="chatInputFull" placeholder="Escribe..." style="flex:1;height:44px;border-radius:12px;border:1.5px solid #ddd;padding:0 14px;font-weight:600;outline:none"><button onclick="sendMsgFull()" style="width:44px;height:44px;border-radius:12px;background:#111;color:#fff;border:none;font-weight:900">➤</button></div>
 </div>
-<div style="padding:10px;display:flex;gap:8px;background:#fff;border-top:1px solid #eee"><input id="chatInputFull" placeholder="Escribe un mensaje..." style="flex:1;height:44px;border-radius:12px;border:1px solid #ddd;padding:0 14px;font-weight:600"><button onclick="sendMsgFull()" style="width:44px;height:44px;border-radius:12px;background:#E53935;border:none;color:#fff;font-weight:900">➤</button></div>
-</div>
-
 </div>
 
 <script>
@@ -82,113 +79,127 @@ const db=firebase.database();
 let driverData=JSON.parse(localStorage.getItem('kigo_driver_data'))||{nombre:"Conductor Kigo",moto:"Honda CB 125",tipo:"moto",vehiculo:"Honda CB 125",foto:"https://i.pravatar.cc/100?img=15",lat:21.1561,lng:-100.9333};
 let driverUid=localStorage.getItem('kigo_driver_uid')||'driver_'+Date.now();
 localStorage.setItem('kigo_driver_uid',driverUid);
-let map=null,directionsService,directionsRenderer,disponible=true,viajeActual=null,viajeActualId=null,chatListener=null,viajesListener=null,timers={},markerDriver=null,watchId=null;
+localStorage.setItem('kigo_driver_data',JSON.stringify(driverData));
+let map=null,directionsService,directionsRenderer,disponible=true,viajeActual=null,viajeActualId=null,chatListener=null,viajesListener=null,timers={},markerDriver=null;
 
-function openAjustes(){document.getElementById("modalAjustes").classList.add("show")}
-function closeAjustes(){document.getElementById("modalAjustes").classList.remove("show")}
-function guardarAjustes(){driverData.nombre=document.getElementById("ajNombre").value||driverData.nombre; driverData.moto=document.getElementById("ajMoto").value||driverData.moto; driverData.tipo=document.getElementById("ajTipo").value; driverData.vehiculo=driverData.moto; localStorage.setItem('kigo_driver_data',JSON.stringify(driverData)); document.getElementById("dName").innerText=driverData.nombre; document.getElementById("dMoto").innerText=driverData.moto+" • "+driverData.tipo.toUpperCase(); db.ref('conductores/'+driverUid).update({...driverData,disponible,online:true}); closeAjustes();}
+function openAjustes(){document.getElementById("ajNombre").value=driverData.nombre;document.getElementById("ajMoto").value=driverData.moto;document.getElementById("ajTipo").value=driverData.tipo;document.getElementById("modalAjustes").classList.add("show");}
+function closeAjustes(){document.getElementById("modalAjustes").classList.remove("show");}
+function guardarAjustes(){driverData.nombre=document.getElementById("ajNombre").value||driverData.nombre;driverData.moto=document.getElementById("ajMoto").value||driverData.moto;driverData.tipo=document.getElementById("ajTipo").value;driverData.vehiculo=driverData.moto;localStorage.setItem('kigo_driver_data',JSON.stringify(driverData));document.getElementById("dName").innerText=driverData.nombre;document.getElementById("dMoto").innerText=driverData.moto+" • "+driverData.tipo.toUpperCase();db.ref('conductores/'+driverUid).update({...driverData,disponible,online:true});closeAjustes();}
 
 window.initMap=function(){
  document.getElementById("mapLoading").style.display="none";
- document.getElementById("dName").innerText=driverData.nombre; document.getElementById("dMoto").innerText=driverData.moto+" • "+driverData.tipo.toUpperCase();
- map=new google.maps.Map(document.getElementById("map"),{center:{lat:driverData.lat,lng:driverData.lng},zoom:15,disableDefaultUI:false});
+ document.getElementById("dName").innerText=driverData.nombre;
+ document.getElementById("dMoto").innerText=driverData.moto+" • "+driverData.tipo.toUpperCase();
+ map=new google.maps.Map(document.getElementById("map"),{center:{lat:driverData.lat,lng:driverData.lng},zoom:15,disableDefaultUI:false,zoomControl:true});
  directionsService=new google.maps.DirectionsService();
- directionsRenderer=new google.maps.DirectionsRenderer({map:map,polylineOptions:{strokeColor:"#E53935",strokeWeight:6}});
+ directionsRenderer=new google.maps.DirectionsRenderer({map:map,polylineOptions:{strokeColor:"#E53935",strokeWeight:6,strokeOpacity:0.9}});
  markerDriver=new google.maps.Marker({position:{lat:driverData.lat,lng:driverData.lng},map:map,icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:"#16a34a",fillOpacity:1,strokeColor:"#fff",strokeWeight:2}});
- setTimeout(()=>google.maps.event.trigger(map,'resize'),500);
+ setTimeout(()=>{google.maps.event.trigger(map,'resize');map.setCenter({lat:driverData.lat,lng:driverData.lng});},400);
+ setTimeout(()=>{google.maps.event.trigger(map,'resize');},1000);
  iniciarTracking();
  escucharViajes();
- const guardado=localStorage.getItem('kigo_pedido_activo'); if(guardado){ viajeActual=JSON.parse(guardado); viajeActualId=localStorage.getItem('kigo_pedido_id'); mostrarActivo(viajeActual); rutaRecoger(viajeActual); }
+ const guardado=localStorage.getItem('kigo_pedido_activo'); if(guardado){viajeActual=JSON.parse(guardado);viajeActualId=localStorage.getItem('kigo_pedido_id');mostrarActivo(viajeActual);rutaRecoger(viajeActual);}
+ const disp=localStorage.getItem('kigo_disponible'); if(disp!==null){disponible=disp==="true";actualizarBoton();}
 }
 
 function iniciarTracking(){
  if(!navigator.geolocation) return;
- watchId=navigator.geolocation.watchPosition(pos=>{
+ navigator.geolocation.watchPosition(pos=>{
   driverData.lat=pos.coords.latitude; driverData.lng=pos.coords.longitude;
   localStorage.setItem('kigo_driver_data',JSON.stringify(driverData));
   if(markerDriver) markerDriver.setPosition({lat:driverData.lat,lng:driverData.lng});
-  // actualizar en Firebase para cliente en tiempo real
-  if(driverUid) db.ref('conductores/'+driverUid).update({lat:driverData.lat,lng:driverData.lng,...driverData,disponible:true,online:true,ts:Date.now()});
+  db.ref('conductores/'+driverUid).update({lat:driverData.lat,lng:driverData.lng,ts:Date.now(),disponible:true,online:true});
   if(viajeActualId) db.ref('viajes/'+viajeActualId+'/conductor').update({lat:driverData.lat,lng:driverData.lng,ts:Date.now()});
-  // si hay ruta activa, recalcular cada 10s
-  if(viajeActual && document.getElementById("btnRuta") && document.getElementById("btnRuta").innerText.includes("ENTREGAR")==false){ rutaRecoger(viajeActual); }
-  if(viajeActual && document.getElementById("btnRuta") && document.getElementById("btnRuta").innerText.includes("ENTREGAR")){ rutaEntregarActual(true); }
- },null,{enableHighAccuracy:true,maximumAge:0,timeout:5000});
+ },null,{enableHighAccuracy:true});
 }
 
-function toggleDisponible(){ if(viajeActual){alert("No puedes desconectarte con pedido activo");return;} disponible=!disponible; localStorage.setItem('kigo_disponible',disponible); actualizarBoton(); if(disponible) db.ref('conductores/'+driverUid).set({...driverData,disponible:true,online:true}); else db.ref('conductores/'+driverUid).update({disponible:false});}
-function actualizarBoton(){ const btn=document.getElementById("btnDisponible"); const txt=document.getElementById("txtOnline"); btn.className=disponible?"btn-online on":"btn-online off"; txt.innerText=disponible?"EN LÍNEA":"DESCONECTADO";}
+function toggleDisponible(){if(viajeActual){alert("No puedes desconectarte con pedido activo");return;}disponible=!disponible;localStorage.setItem('kigo_disponible',disponible);actualizarBoton();if(disponible)db.ref('conductores/'+driverUid).set({...driverData,disponible:true,online:true});else db.ref('conductores/'+driverUid).update({disponible:false});}
+function actualizarBoton(){const btn=document.getElementById("btnDisponible");const txt=document.getElementById("txtOnline");btn.className=disponible?"btn-online on":"btn-online off";txt.innerText=disponible?"EN LÍNEA":"DESCONECTADO";}
 
 function escucharViajes(){
  if(viajesListener) viajesListener.off();
  viajesListener=db.ref('viajes').orderByChild('estado').equalTo('buscando');
  viajesListener.on('value',snap=>{
   if(viajeActual) return;
-  const box=document.getElementById("pedidosEsperaBox"); const viajes=snap.val(); if(!viajes){ box.innerHTML='<div style="text-align:center;padding:10px;font-size:11px;opacity:.4">Esperando pedidos...</div>'; return;}
-  let lista=[]; for(let id in viajes){ let v=viajes[id]; if(v.tipo===driverData.tipo) lista.push({id,...v}); }
-  box.innerHTML=""; lista.forEach(v=>{
-   const wrap=document.createElement("div"); wrap.className="pedido-item"; wrap.id="pedido_"+v.id;
-   wrap.innerHTML=`<div style="font-weight:800;font-size:12px">📍 ${v.destino.substring(0,34)}</div><div style="font-size:10px;opacity:.6">Desde: ${v.origen.substring(0,30)} • ${v.distKm} km</div><div style="margin-top:6px"><span class="badge-neon badge-price">$${v.precio} MXN</span> <span class="badge-neon badge-pay">${(v.metodoPago||'efectivo').toUpperCase()}</span></div><div class="btn-aceptar" id="btn_${v.id}"><div id="fill_${v.id}" class="btn-aceptar-fill"></div><div class="btn-aceptar-text"><span>ACEPTAR VIAJE</span> <span id="sec_${v.id}" style="background:#fff;color:#E53935;padding:2px 8px;border-radius:999px;font-size:11px">10s</span></div></div>`;
+  const box=document.getElementById("pedidosEsperaBox");const viajes=snap.val();if(!viajes){box.innerHTML='<div style="text-align:center;padding:10px;font-size:11px;opacity:.4">Esperando pedidos...</div>';return;}
+  let lista=[];for(let id in viajes){let v=viajes[id];if(v.tipo===driverData.tipo) lista.push({id,...v});}
+  if(lista.length===0){box.innerHTML='<div style="text-align:center;padding:10px;font-size:11px;opacity:.4">No hay pedidos de '+driverData.tipo+'</div>';return;}
+  box.innerHTML="";lista.forEach(v=>{
+   const wrap=document.createElement("div");wrap.className="pedido-item";wrap.id="pedido_"+v.id;
+   wrap.innerHTML=`<div style="font-weight:800;font-size:12px">📍 ${v.destino.substring(0,34)}</div><div style="font-size:10px;opacity:.6;margin-top:2px">Desde: ${v.origen.substring(0,30)} • ${v.distKm} km</div><div style="margin-top:6px"><span class="badge-neon badge-price">$${v.precio} MXN</span> <span class="badge-neon badge-pay">${(v.metodoPago||'efectivo').toUpperCase()}</span></div><div class="btn-aceptar" id="btn_${v.id}"><div id="fill_${v.id}" class="btn-aceptar-fill"></div><div class="btn-aceptar-text"><span>ACEPTAR VIAJE</span> <span id="sec_${v.id}" style="background:#fff;color:#E53935;padding:2px 8px;border-radius:999px;font-size:11px">10s</span></div></div>`;
    box.appendChild(wrap);
-   document.getElementById("btn_"+v.id).addEventListener("click",()=>aceptarPedido(v.id));
-   const fill=document.getElementById("fill_"+v.id); setTimeout(()=>fill.style.width="0%",100); let s=10; let inter=setInterval(()=>{s--; document.getElementById("sec_"+v.id).innerText=s+"s";},1000); let to=setTimeout(()=>{const el=document.getElementById("pedido_"+v.id); if(el) el.remove(); clearInterval(inter);},10000); timers[v.id]={interval:inter,timeout:to};
+   document.getElementById("btn_"+v.id).onclick=()=>aceptarPedido(v.id);
+   const fill=document.getElementById("fill_"+v.id);setTimeout(()=>fill.style.width="0%",100);let s=10;let inter=setInterval(()=>{s--;const el=document.getElementById("sec_"+v.id);if(el) el.innerText=s+"s";},1000);let to=setTimeout(()=>{const el=document.getElementById("pedido_"+v.id);if(el) el.remove();clearInterval(inter);},10000);timers[v.id]={interval:inter,timeout:to};
   });
  });
 }
 
 function aceptarPedido(id){
- if(viajeActual) return; if(timers[id]){ clearInterval(timers[id].interval); clearTimeout(timers[id].timeout);}
+ if(viajeActual) return;
+ if(timers[id]){clearInterval(timers[id].interval);clearTimeout(timers[id].timeout);}
  db.ref('viajes/'+id).once('value').then(s=>{
-  const v=s.val(); if(!v || v.estado!=='buscando') return;
+  const v=s.val(); if(!v || v.estado!=='buscando'){alert("Ya tomado");return;}
   viajeActual=v; viajeActualId=id;
+  // 1. UI inmediata
   document.getElementById("pedidosEsperaBox").innerHTML="";
-  mostrarActivo(viajeActual); rutaRecoger(viajeActual);
-  // enlazar al cliente
-  db.ref('viajes/'+id).update({estado:'aceptado', conductor:{id:driverUid, nombre:driverData.nombre, foto:driverData.foto, placa:driverData.moto, vehiculo:driverData.moto, telefono:'4181234567', lat:driverData.lat, lng:driverData.lng, ts:Date.now()}, conductorAsignadoAt:Date.now()});
-  localStorage.setItem('kigo_pedido_activo',JSON.stringify(viajeActual)); localStorage.setItem('kigo_pedido_id',id);
-  disponible=false; localStorage.setItem('kigo_disponible','false'); actualizarBoton(); escucharChat();
+  mostrarActivo(viajeActual);
+  rutaRecoger(viajeActual);
+  // 2. Firebase enlace al cliente - ESTO ES LO QUE ARREGLA EL "BUSCANDO"
+  db.ref('viajes/'+id).update({
+    estado:'aceptado',
+    conductor:{
+      id:driverUid,
+      nombre:driverData.nombre,
+      foto:driverData.foto,
+      placa:driverData.moto,
+      vehiculo:driverData.moto,
+      telefono:'4181234567',
+      lat:driverData.lat,
+      lng:driverData.lng,
+      ts:Date.now()
+    },
+    conductorAsignadoAt:Date.now()
+  });
+  localStorage.setItem('kigo_pedido_activo',JSON.stringify(viajeActual));
+  localStorage.setItem('kigo_pedido_id',id);
+  disponible=false; localStorage.setItem('kigo_disponible','false'); actualizarBoton();
+  escucharChat();
  });
 }
 
 function mostrarActivo(v){
  document.getElementById("pedidoActivoBox").innerHTML=`
  <div class="card-dark" style="border-color:#16a34a">
- <div style="font-size:9px;font-weight:900;color:#16a34a">● ACTIVO • CONECTADO AL MAPA EN TIEMPO REAL</div>
+ <div style="font-size:9px;font-weight:900;color:#16a34a">● ACTIVO • CONECTADO AL MAPA</div>
  <div style="display:flex;gap:10px;margin-top:10px"><div style="display:flex;flex-direction:column;align-items:center"><div style="width:10px;height:10px;background:#16a34a;border-radius:50%"></div><div style="width:2px;height:32px;background:#333;margin:4px 0"></div><div style="width:10px;height:10px;background:#E53935;border-radius:50%"></div></div><div style="flex:1"><div style="font-size:9px;opacity:.5;font-weight:800">RECOGER</div><div style="font-weight:800;font-size:12px;margin-bottom:8px">${v.origen}</div><div style="font-size:9px;opacity:.5;font-weight:800">ENTREGAR</div><div style="font-weight:800;font-size:12px">${v.destino}</div></div></div>
  <div style="display:flex;gap:6px;margin-top:10px"><span class="badge-neon badge-price">$${v.precio} MXN</span><span class="badge-neon badge-pay">${(v.metodoPago||'efectivo').toUpperCase()}</span></div>
- <div style="display:flex;gap:8px;margin-top:12px"><button id="btnRuta" style="flex:1;height:44px;background:#16a34a;color:#fff;border:none;border-radius:12px;font-weight:900;font-size:12px">VOY EN CAMINO A RECOGER</button><button id="btnChat" style="width:44px;height:44px;background:#fff;border:1px solid #ddd;border-radius:12px;color:#111"><i class="material-icons" style="font-size:20px">chat</i></button></div>
+ <div style="display:flex;gap:8px;margin-top:12px"><button id="btnRuta" style="flex:1;height:44px;background:#16a34a;color:#fff;border:none;border-radius:12px;font-weight:900;font-size:12px">VOY EN CAMINO A RECOGER</button><button id="btnChat" style="width:44px;height:44px;background:#fff;border:1px solid #ddd;border-radius:12px;color:#111;display:flex;align-items:center;justify-content:center"><i class="material-icons">chat</i></button></div>
  <button id="btnFin" style="width:100%;height:38px;background:#111;border:1px solid #333;color:#fff;border-radius:10px;font-weight:800;margin-top:10px;font-size:11px">FINALIZAR VIAJE</button>
  </div>`;
- document.getElementById("btnRuta").onclick=()=>{ rutaRecogerActual(); db.ref('viajes/'+viajeActualId).update({estado:'recogiendo'}); };
- document.getElementById("btnChat").onclick=()=>{ document.getElementById("modalChat").classList.add("show"); };
+ document.getElementById("btnRuta").onclick=()=>{rutaRecoger(viajeActual); db.ref('viajes/'+viajeActualId).update({estado:'recogiendo'}); const b=document.getElementById("btnRuta"); b.innerText="VOY EN CAMINO A ENTREGAR"; b.onclick=rutaEntregarActual; };
+ document.getElementById("btnChat").onclick=()=>document.getElementById("modalChat").classList.add("show");
  document.getElementById("btnFin").onclick=finalizarViaje;
 }
-
 function rutaRecoger(v){
  if(!directionsService||!map) return;
  const origin=new google.maps.LatLng(driverData.lat, driverData.lng);
  const dest=new google.maps.LatLng(v.origenLat, v.origenLng);
  directionsService.route({origin:origin,destination:dest,travelMode:google.maps.TravelMode.DRIVING},(res,status)=>{
-  if(status==="OK"){ directionsRenderer.setDirections(res);
-   // tiempo estimado para cliente
-   const leg=res.routes[0].legs[0]; if(leg && viajeActualId){ db.ref('viajes/'+viajeActualId).update({etaTexto:leg.duration.text, etaSeg:leg.duration.value, distanciaRecoger:leg.distance.text}); }
-  }
+  if(status==="OK"){directionsRenderer.setDirections(res); const leg=res.routes[0].legs[0]; if(leg && viajeActualId) db.ref('viajes/'+viajeActualId).update({etaTexto:leg.duration.text, etaSeg:leg.duration.value, distanciaRecoger:leg.distance.text});}
  });
 }
-function rutaRecogerActual(){ rutaRecoger(viajeActual); const btn=document.getElementById("btnRuta"); btn.innerText="VOY EN CAMINO A ENTREGAR"; btn.onclick=rutaEntregarActual; }
-function rutaEntregarActual(silent=false){
+function rutaEntregarActual(){
  const origin=new google.maps.LatLng(driverData.lat, driverData.lng);
  const dest=new google.maps.LatLng(viajeActual.destLat, viajeActual.destLng);
  directionsService.route({origin:origin,destination:dest,travelMode:google.maps.TravelMode.DRIVING},(res,status)=>{
-  if(status==="OK"){ directionsRenderer.setDirections(res); const leg=res.routes[0].legs[0]; if(leg && viajeActualId) db.ref('viajes/'+viajeActualId).update({etaTexto:leg.duration.text, etaSeg:leg.duration.value, distanciaEntrega:leg.distance.text}); }
+  if(status==="OK"){directionsRenderer.setDirections(res); const leg=res.routes[0].legs[0]; if(leg && viajeActualId) db.ref('viajes/'+viajeActualId).update({etaTexto:leg.duration.text, distanciaEntrega:leg.distance.text});}
  });
- if(!silent){ const btn=document.getElementById("btnRuta"); btn.innerText="FINALIZAR VIAJE"; btn.style.background="#111"; btn.onclick=finalizarViaje; db.ref('viajes/'+viajeActualId).update({estado:'en_curso'}); }
+ const btn=document.getElementById("btnRuta"); btn.innerText="FINALIZAR VIAJE"; btn.style.background="#111"; btn.onclick=finalizarViaje; db.ref('viajes/'+viajeActualId).update({estado:'en_curso'});
 }
+function finalizarViaje(){db.ref('viajes/'+viajeActualId).update({estado:'finalizado'});db.ref('conductores/'+driverUid).update({ocupado:false,disponible:true});viajeActual=null;viajeActualId=null;localStorage.removeItem('kigo_pedido_activo');localStorage.removeItem('kigo_pedido_id');document.getElementById("pedidoActivoBox").innerHTML='<div style="text-align:center;padding:14px;background:#1c1c1c;border-radius:14px;border:1px dashed #333;font-size:12px;opacity:.6">Sin pedidos activos</div>';disponible=true;localStorage.setItem('kigo_disponible','true');actualizarBoton();if(directionsRenderer) directionsRenderer.setDirections({routes:[]});if(chatListener) chatListener.off();escucharViajes();}
 
-function finalizarViaje(){ db.ref('viajes/'+viajeActualId).update({estado:'finalizado'}); db.ref('conductores/'+driverUid).update({ocupado:false,disponible:true}); viajeActual=null; viajeActualId=null; localStorage.removeItem('kigo_pedido_activo'); localStorage.removeItem('kigo_pedido_id'); document.getElementById("pedidoActivoBox").innerHTML='<div style="text-align:center;padding:14px;background:#1c1c1c;border-radius:14px;border:1px dashed #333;font-size:12px;opacity:.6">Sin pedidos activos</div>'; disponible=true; localStorage.setItem('kigo_disponible','true'); actualizarBoton(); if(directionsRenderer) directionsRenderer.setDirections({routes:[]}); if(chatListener) chatListener.off(); escucharViajes();}
-
-// CHAT PANTALLA BLANCA
-function closeChat(){ document.getElementById("modalChat").classList.remove("show"); }
+// CHAT
+function closeChat(){document.getElementById("modalChat").classList.remove("show");}
 function escucharChat(){
  if(chatListener) chatListener.off();
  chatListener=db.ref('viajes/'+viajeActualId+'/chat');
@@ -197,8 +208,8 @@ function escucharChat(){
   const box=document.getElementById("chatBoxFull"); const div=document.createElement("div"); div.className=m.de==='cliente'?'msg other':'msg me'; div.innerText=m.msg; box.appendChild(div); box.scrollTop=box.scrollHeight;
  });
 }
-function sendQuick(t){ db.ref('viajes/'+viajeActualId+'/chat').push({de:'conductor',msg:t,t:Date.now()}); }
-function sendMsgFull(){ const inp=document.getElementById("chatInputFull"); if(!inp.value.trim()) return; const msg=inp.value.trim(); db.ref('viajes/'+viajeActualId+'/chat').push({de:'conductor',msg,t:Date.now()}); inp.value=""; }
+function sendQuick(t){ if(!viajeActualId) return; db.ref('viajes/'+viajeActualId+'/chat').push({de:'conductor',msg:t,t:Date.now()}); }
+function sendMsgFull(){ const inp=document.getElementById("chatInputFull"); if(!inp.value.trim()) return; const msg=inp.value.trim(); if(viajeActualId) db.ref('viajes/'+viajeActualId+'/chat').push({de:'conductor',msg:msg,t:Date.now()}); inp.value=""; }
 </script>
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap"></script>
 </body>
