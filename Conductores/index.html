@@ -3,18 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Kigo Driver - Mapa Cliente Copiado</title>
+<title>Kigo Driver - Conductor</title>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <style>
 *{box-sizing:border-box;font-family:system-ui}body{margin:0;background:#0a0a0a;color:#fff;overflow:hidden}
 .app{max-width:480px;margin:0 auto;background:#0f0f0f;height:100dvh;display:flex;flex-direction:column;overflow:hidden;position:relative}
-
-/* MAPA COPIADO EXACTO DEL CLIENTE QUE SI FUNCIONA */
+/* MAPA TUYO QUE SI FUNCIONA - NO TOCADO */
 .map-container{position:relative;width:100%;height:48vh;min-height:300px;flex-shrink:0}
 #map{width:100%;height:100%}
-
 .header{background:#fff;color:#111;padding:10px 12px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;border-radius:0 0 20px 20px;z-index:1000;flex-shrink:0}
 .left-info{display:flex;align-items:center;gap:8px;min-width:0}
 .avatar{width:36px;height:36px;border-radius:50%;border:2px solid #E53935}
@@ -79,12 +77,11 @@ const CENTRO={lat:21.1561,lng:-100.9333};
 let driverData=JSON.parse(localStorage.getItem('kigo_driver_data'))||{nombre:"Conductor Kigo",moto:"Honda CB 125",tipo:"moto",vehiculo:"Honda CB 125",foto:"https://i.pravatar.cc/100?img=15",lat:21.1561,lng:-100.9333};
 let driverUid=localStorage.getItem('kigo_driver_uid')||'driver_'+Date.now();
 localStorage.setItem('kigo_driver_uid',driverUid);
-let map=null,directionsService,directionsRenderer,disponible=true,viajeActual=null,viajeActualId=null,chatListener=null,viajesListener=null,markerDriver=null;
+let map=null,directionsService,directionsRenderer,disponible=true,viajeActual=null,viajeActualId=null,chatListener=null,viajesListener=null,markerDriver=null,ubicInterval=null;
 
 function openAjustes(){document.getElementById("modalAjustes").classList.add("show");document.getElementById("ajNombre").value=driverData.nombre;document.getElementById("ajMoto").value=driverData.moto;document.getElementById("ajTipo").value=driverData.tipo;}
 function guardarAjustes(){driverData.nombre=document.getElementById("ajNombre").value||driverData.nombre;driverData.moto=document.getElementById("ajMoto").value||driverData.moto;driverData.tipo=document.getElementById("ajTipo").value;driverData.vehiculo=driverData.moto;localStorage.setItem('kigo_driver_data',JSON.stringify(driverData));document.getElementById("dName").innerText=driverData.nombre;document.getElementById("dMoto").innerText=driverData.moto+" • "+driverData.tipo.toUpperCase();db.ref('conductores/'+driverUid).update({...driverData,disponible:true,online:true});document.getElementById('modalAjustes').classList.remove('show');}
 
-// ESTE ES TU initMaps DEL CLIENTE COPIADO
 function initMaps(){
   map=new google.maps.Map(document.getElementById("map"),{center:CENTRO,zoom:14,disableDefaultUI:true});
   directionsService=new google.maps.DirectionsService();
@@ -92,7 +89,6 @@ function initMaps(){
   markerDriver=new google.maps.Marker({position:CENTRO,map:map,icon:{path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:"#16a34a",fillOpacity:1,strokeColor:"#fff",strokeWeight:2}});
   document.getElementById("dName").innerText=driverData.nombre;
   document.getElementById("dMoto").innerText=driverData.moto+" • "+driverData.tipo.toUpperCase();
-
   if(navigator.geolocation){
     navigator.geolocation.watchPosition(pos=>{
       driverData.lat=pos.coords.latitude; driverData.lng=pos.coords.longitude;
@@ -129,21 +125,47 @@ function escucharViajes(){
  });
 }
 
+// FUNCION ARREGLADA PARA QUE LE APAREZCA AL CLIENTE AUTOMATICO
 function aceptarPedido(id){
  db.ref('viajes/'+id).once('value').then(s=>{
-  const v=s.val(); if(!v || v.estado!=='buscando') return;
+  const v=s.val(); if(!v || v.estado!=='buscando') { alert('Ya fue tomado'); return; }
   viajeActual=v; viajeActualId=id;
   document.getElementById("pedidosEsperaBox").innerHTML="";
   mostrarActivo(viajeActual); rutaRecoger(viajeActual);
-  db.ref('viajes/'+id).update({estado:'aceptado', conductor:{id:driverUid,nombre:driverData.nombre,foto:driverData.foto,placa:driverData.moto,vehiculo:driverData.moto,telefono:'4181234567',lat:driverData.lat,lng:driverData.lng,ts:Date.now()},conductorAsignadoAt:Date.now()});
+  const latAhora = driverData.lat || CENTRO.lat;
+  const lngAhora = driverData.lng || CENTRO.lng;
+  db.ref('viajes/'+id).update({
+    estado:'aceptado',
+    conductor:{
+      id:driverUid,
+      nombre:driverData.nombre,
+      foto:driverData.foto,
+      placa:driverData.moto,
+      vehiculo:driverData.moto,
+      telefono:'4181234567',
+      lat:latAhora,
+      lng:lngAhora,
+      ts:Date.now()
+    },
+    etaTexto: '3-4 min',
+    distanciaRecoger: v.distKm + ' km',
+    conductorAsignadoAt: Date.now()
+  });
   localStorage.setItem('kigo_pedido_activo',JSON.stringify(viajeActual)); localStorage.setItem('kigo_pedido_id',id);
   disponible=false; const btn=document.getElementById("btnDisponible"); btn.className="btn-online off"; document.getElementById("txtOnline").innerText="OCUPADO";
   escucharChat();
+  if(ubicInterval) clearInterval(ubicInterval);
+  ubicInterval=setInterval(()=>{
+    if(viajeActualId){
+      db.ref('viajes/'+viajeActualId+'/conductor').update({lat:driverData.lat||latAhora,lng:driverData.lng||lngAhora,ts:Date.now()});
+      db.ref('viajes/'+viajeActualId).update({etaTexto:'2-3 min'});
+    }
+  },3000);
  });
 }
 
 function mostrarActivo(v){
- document.getElementById("pedidoActivoBox").innerHTML=`<div class="card-dark" style="border-color:#16a34a"><div style="font-size:9px;font-weight:900;color:#16a34a">● ACTIVO • CONECTADO AL MAPA EN TIEMPO REAL</div><div style="margin-top:8px;font-weight:800;font-size:12px">${v.origen} → ${v.destino}</div><div style="display:flex;gap:8px;margin-top:12px"><button id="btnRuta" style="flex:1;height:44px;background:#16a34a;color:#fff;border:none;border-radius:12px;font-weight:900;font-size:12px">VOY EN CAMINO A RECOGER</button><button id="btnChat" style="width:44px;height:44px;background:#fff;border:1px solid #ddd;border-radius:12px;color:#111;display:flex;align-items:center;justify-content:center"><i class="material-icons">chat</i></button></div><button id="btnFin" style="width:100%;height:38px;background:#111;border:1px solid #333;color:#fff;border-radius:10px;font-weight:800;margin-top:10px;font-size:11px">FINALIZAR VIAJE</button></div>`;
+ document.getElementById("pedidoActivoBox").innerHTML=`<div class="card-dark" style="border-color:#16a34a"><div style="font-size:9px;font-weight:900;color:#16a34a">● ACTIVO • CONECTADO AL MAPA EN TIEMPO REAL</div><div style="margin-top:8px;font-weight:800;font-size:12px">${v.origen} → ${v.destino}</div><div style="margin-top:6px;font-size:11px;opacity:.7">$${v.precio} MXN • ${v.distKm} km • ${v.tipo.toUpperCase()}</div><div style="display:flex;gap:8px;margin-top:12px"><button id="btnRuta" style="flex:1;height:44px;background:#16a34a;color:#fff;border:none;border-radius:12px;font-weight:900;font-size:12px">VOY EN CAMINO A RECOGER</button><button id="btnChat" style="width:44px;height:44px;background:#fff;border:1px solid #ddd;border-radius:12px;color:#111;display:flex;align-items:center;justify-content:center"><i class="material-icons">chat</i></button></div><button id="btnFin" style="width:100%;height:38px;background:#111;border:1px solid #333;color:#fff;border-radius:10px;font-weight:800;margin-top:10px;font-size:11px">FINALIZAR VIAJE</button></div>`;
  document.getElementById("btnRuta").onclick=()=>{rutaRecoger(viajeActual); db.ref('viajes/'+viajeActualId).update({estado:'recogiendo'}); const b=document.getElementById("btnRuta"); b.innerText="VOY EN CAMINO A ENTREGAR"; b.onclick=rutaEntregarActual;};
  document.getElementById("btnChat").onclick=()=>document.getElementById("modalChat").classList.add("show");
  document.getElementById("btnFin").onclick=finalizarViaje;
@@ -160,7 +182,7 @@ function rutaEntregarActual(){
  directionsService.route({origin:origin,destination:dest,travelMode:google.maps.TravelMode.DRIVING},(res,status)=>{ if(status==="OK") directionsRenderer.setDirections(res);});
  db.ref('viajes/'+viajeActualId).update({estado:'en_curso'});
 }
-function finalizarViaje(){db.ref('viajes/'+viajeActualId).update({estado:'finalizado'}); db.ref('conductores/'+driverUid).update({ocupado:false,disponible:true}); viajeActual=null; viajeActualId=null; localStorage.removeItem('kigo_pedido_activo'); localStorage.removeItem('kigo_pedido_id'); document.getElementById("pedidoActivoBox").innerHTML='<div style="text-align:center;padding:14px;background:#1c1c1c;border-radius:14px;border:1px dashed #333;font-size:12px;opacity:.6">Sin pedidos activos</div>'; disponible=true; document.getElementById("btnDisponible").className="btn-online on"; document.getElementById("txtOnline").innerText="EN LÍNEA"; if(directionsRenderer) directionsRenderer.setDirections({routes:[]}); if(chatListener) chatListener.off(); escucharViajes();}
+function finalizarViaje(){if(ubicInterval) clearInterval(ubicInterval); db.ref('viajes/'+viajeActualId).update({estado:'finalizado'}); db.ref('conductores/'+driverUid).update({ocupado:false,disponible:true}); viajeActual=null; viajeActualId=null; localStorage.removeItem('kigo_pedido_activo'); localStorage.removeItem('kigo_pedido_id'); document.getElementById("pedidoActivoBox").innerHTML='<div style="text-align:center;padding:14px;background:#1c1c1c;border-radius:14px;border:1px dashed #333;font-size:12px;opacity:.6">Sin pedidos activos</div>'; disponible=true; document.getElementById("btnDisponible").className="btn-online on"; document.getElementById("txtOnline").innerText="EN LÍNEA"; if(directionsRenderer) directionsRenderer.setDirections({routes:[]}); if(chatListener) chatListener.off(); escucharViajes();}
 function escucharChat(){ if(chatListener) chatListener.off(); chatListener=db.ref('viajes/'+viajeActualId+'/chat'); chatListener.on('child_added',snap=>{const m=snap.val(); if(!m) return; const box=document.getElementById("chatBoxFull"); const div=document.createElement("div"); div.className=m.de==='cliente'?'msg other':'msg me'; div.innerText=m.msg; box.appendChild(div); box.scrollTop=box.scrollHeight;});}
 function sendQuick(t){ if(viajeActualId) db.ref('viajes/'+viajeActualId+'/chat').push({de:'conductor',msg:t,t:Date.now()});}
 function sendMsgFull(){ const inp=document.getElementById("chatInputFull"); if(!inp.value.trim()) return; const msg=inp.value.trim(); if(viajeActualId) db.ref('viajes/'+viajeActualId+'/chat').push({de:'conductor',msg:msg,t:Date.now()}); inp.value="";}
